@@ -86,7 +86,47 @@ public class MovieListServlet extends HttpServlet {
                 jsonMovieObject.addProperty("year",year);
                 jsonMovieObject.addProperty("director",director);
 
+                //Add all the associated movieGenres as a JsonArray, since there are a variable amount of them per list
+                JsonArray movieGenres = new JsonArray();
+                while (genreResultSet.next()){
+                    JsonObject jsonGenreObject = new JsonObject();
+                    jsonGenreObject.addProperty("id",genreResultSet.getInt("id"));
+                    jsonGenreObject.addProperty("name",genreResultSet.getString("name"));
+
+
+                    //Add the genre object to the Json array
+                    movieGenres.add(jsonGenreObject);
+                }
+                //Finally genres Jsonarray itself
+                jsonMovieObject.add("genres",movieGenres);
+
+                //Time to add the stars associated with the movie, also as a JsonArray
+                JsonArray movieStars= new JsonArray();
+                while (starsResultSet.next()){
+                    JsonObject jsonStarObject = new JsonObject();
+                    jsonStarObject.addProperty("id",starsResultSet.getString("id"));
+                    jsonStarObject.addProperty("name",starsResultSet.getString("name"));
+                    //Yes, the resultset has birthyear as 1 word with no underscore
+                    jsonStarObject.addProperty("birth_year",starsResultSet.getInt("birthyear"));
+
+                    //Add the star json object to the movieStars JsonArray
+                    movieStars.add(jsonStarObject);
+                }
+
+                //Now we get to add the stars as a Json array
+                jsonMovieObject.add("stars",movieStars);
+                //CLOSE THE genre and stars resultSets here! They are created in each iteration and are not needed for the next!
+                genreResultSet.close();
+                starsResultSet.close();
+
+                jsonArray.add(jsonMovieObject);
             }
+
+            // Log to localhost log
+            req.getServletContext().log("getting " + jsonArray.size() + " results");
+            out.write(jsonArray.toString());
+            // Set response status to 200 (OK)
+            resp.setStatus(200);
 
         }
         catch (Exception e){
