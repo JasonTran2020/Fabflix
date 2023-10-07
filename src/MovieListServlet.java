@@ -51,6 +51,7 @@ public class MovieListServlet extends HttpServlet {
 
             // We also need to gather 3 stars and 3 genres for each movie. Unlike ratings and movies, which have a 1 to 1 relationship, genres and stars both
             //have a many-to-many relationship. I don't think it's worth creating one giant query that has everything
+            //However, that stuff was refactored to the two private functions with names that sound like what they are suppose to do. I'm losing it
             PreparedStatement genreStatement = conn.prepareStatement("SELECT g.id,g.name FROM genres AS g, genres_in_movies AS gim WHERE gim.movieid = ? AND gim.genreid = g.id LIMIT 3");
             PreparedStatement starsStatement = conn.prepareStatement("SELECT s.id,s.name,s.birthYear FROM stars AS s, stars_in_movies AS sim WHERE sim.movieid = ? and sim.starid = s.id LIMIT 3");
 
@@ -86,36 +87,13 @@ public class MovieListServlet extends HttpServlet {
                 jsonMovieObject.addProperty("year",year);
                 jsonMovieObject.addProperty("director",director);
 
-                //Add all the associated movieGenres as a JsonArray, since there are a variable amount of them per list
-                JsonArray movieGenres = new JsonArray();
-                while (genreResultSet.next()){
-                    JsonObject jsonGenreObject = new JsonObject();
-                    jsonGenreObject.addProperty("id",genreResultSet.getInt("id"));
-                    jsonGenreObject.addProperty("name",genreResultSet.getString("name"));
+                //Adding the genres was relegated to a separate function
+                this.addGenres(movie_id,jsonMovieObject,genreResultSet);
 
+                //Same goes for the stars
+                this.addStars(movie_id,jsonMovieObject,starsResultSet);
 
-                    //Add the genre object to the Json array
-                    movieGenres.add(jsonGenreObject);
-                }
-                //Finally genres Jsonarray itself
-                jsonMovieObject.add("genres",movieGenres);
-
-                //Time to add the stars associated with the movie, also as a JsonArray
-                JsonArray movieStars= new JsonArray();
-                while (starsResultSet.next()){
-                    JsonObject jsonStarObject = new JsonObject();
-                    jsonStarObject.addProperty("id",starsResultSet.getString("id"));
-                    jsonStarObject.addProperty("name",starsResultSet.getString("name"));
-                    //Yes, the resultset has birthyear as 1 word with no underscore
-                    jsonStarObject.addProperty("birth_year",starsResultSet.getInt("birthyear"));
-
-                    //Add the star json object to the movieStars JsonArray
-                    movieStars.add(jsonStarObject);
-                }
-
-                //Now we get to add the stars as a Json array
-                jsonMovieObject.add("stars",movieStars);
-                //CLOSE THE genre and stars resultSets here! They are created in each iteration and are not needed for the next!
+                // STILL NEED TO CLOSE THE genre and stars resultSets here! They are created in each iteration and are not needed for the next!
                 genreResultSet.close();
                 starsResultSet.close();
 
@@ -142,5 +120,39 @@ public class MovieListServlet extends HttpServlet {
         finally {
             out.close();
         }
+    }
+    private void addGenres(String movie_id,JsonObject jsonMovieObject, ResultSet genreResultSet) throws java.sql.SQLException{
+        //Add all the associated movieGenres as a JsonArray, since there are a variable amount of them per list
+        JsonArray movieGenres = new JsonArray();
+        while (genreResultSet.next()){
+            JsonObject jsonGenreObject = new JsonObject();
+            jsonGenreObject.addProperty("id",genreResultSet.getInt("id"));
+            jsonGenreObject.addProperty("name",genreResultSet.getString("name"));
+
+
+            //Add the genre object to the Json array
+            movieGenres.add(jsonGenreObject);
+        }
+        //Finally genres Jsonarray itself
+        jsonMovieObject.add("genres",movieGenres);
+
+    }
+
+    private void addStars(String movie_id,JsonObject jsonMovieObject, ResultSet starsResultSet) throws java.sql.SQLException{
+        //Time to add the stars associated with the movie, also as a JsonArray
+        JsonArray movieStars= new JsonArray();
+        while (starsResultSet.next()){
+            JsonObject jsonStarObject = new JsonObject();
+            jsonStarObject.addProperty("id",starsResultSet.getString("id"));
+            jsonStarObject.addProperty("name",starsResultSet.getString("name"));
+            //Yes, the resultset has birthyear as 1 word with no underscore
+            jsonStarObject.addProperty("birth_year",starsResultSet.getInt("birthyear"));
+
+            //Add the star json object to the movieStars JsonArray
+            movieStars.add(jsonStarObject);
+        }
+        //Now we get to add the stars as a Json array
+        jsonMovieObject.add("stars",movieStars);
+
     }
 }
