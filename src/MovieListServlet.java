@@ -52,8 +52,8 @@ public class MovieListServlet extends HttpServlet {
             // We also need to gather 3 stars and 3 genres for each movie. Unlike ratings and movies, which have a 1 to 1 relationship, genres and stars both
             //have a many-to-many relationship. I don't think it's worth creating one giant query that has everything
             //However, that stuff was refactored to the two private functions with names that sound like what they are suppose to do. I'm losing it
-            PreparedStatement genreStatement = conn.prepareStatement("SELECT g.id,g.name FROM genres AS g, genres_in_movies AS gim WHERE gim.movieid = ? AND gim.genreid = g.id LIMIT 3");
-            PreparedStatement starsStatement = conn.prepareStatement("SELECT s.id,s.name,s.birthYear FROM stars AS s, stars_in_movies AS sim WHERE sim.movieid = ? and sim.starid = s.id LIMIT 3");
+            PreparedStatement genreStatement = conn.prepareStatement("SELECT g.id,g.name FROM genres AS g, genres_in_movies AS gim WHERE gim.movieid = ? AND gim.genreid = g.id");
+            PreparedStatement starsStatement = conn.prepareStatement("SELECT s.id,s.name,s.birthYear FROM stars AS s, stars_in_movies AS sim WHERE sim.movieid = ? and sim.starid = s.id");
 
             //Get top 20 movies by joining the movies and ratings table by movieId from ratings and id from movies.
             //And then order by descending and limiting by 20
@@ -73,6 +73,7 @@ public class MovieListServlet extends HttpServlet {
                 String title = resultSet.getString("title");
                 int year = resultSet.getInt("year");
                 String director =resultSet.getString("director");
+                float rating = resultSet.getFloat("rating");
 
                 //Add arguments to the statement before executing
                 genreStatement.setString(1, movie_id);
@@ -86,6 +87,7 @@ public class MovieListServlet extends HttpServlet {
                 jsonMovieObject.addProperty("title",title);
                 jsonMovieObject.addProperty("year",year);
                 jsonMovieObject.addProperty("director",director);
+                jsonMovieObject.addProperty("rating",rating);
 
                 //Adding the genres was relegated to a separate function
                 this.addGenres(movie_id,jsonMovieObject,genreResultSet);
