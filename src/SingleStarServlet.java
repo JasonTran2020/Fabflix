@@ -19,7 +19,7 @@ import java.sql.ResultSet;
 @WebServlet(name = "SingleStarServlet", urlPatterns = "/api/single-star")
 public class SingleStarServlet extends HttpServlet {
     private static final long serialVersionUID = 2L;
-
+    public static String TAG = "SingleStarServlet: ";
     // Create a dataSource which registered in web.xml
     private DataSource dataSource;
 
@@ -43,7 +43,7 @@ public class SingleStarServlet extends HttpServlet {
         String id = request.getParameter("id");
 
         // The log message can be found in localhost log
-        request.getServletContext().log("getting id: " + id);
+        request.getServletContext().log(TAG + "getting id: " + id);
 
         // Output stream to STDOUT
         PrintWriter out = response.getWriter();
@@ -108,7 +108,7 @@ public class SingleStarServlet extends HttpServlet {
             out.write(jsonObject.toString());
 
             // Log error to localhost log
-            request.getServletContext().log("Error:", e);
+            request.getServletContext().log(TAG + "Error:", e);
             // Set response status to 500 (Internal Server Error)
             response.setStatus(500);
         } finally {

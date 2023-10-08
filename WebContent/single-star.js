@@ -58,7 +58,9 @@ function handleResult(resultData) {
     for (let i = 0; i < Math.min(10, resultData.length); i++) {
         let rowHTML = "";
         rowHTML += "<tr>";
-        rowHTML += "<th>" + resultData[i]["movie_title"] + "</th>";
+        //REMEMEMBER, THE URL LITERALLY HAS TO BE IN DOUBLE QUOTES. Hence, we use single quotes to allow double quotes in the string itself
+        // the url has to ("single-movie.html?id=wlo"), not just (single-movie.html?id=wlo)
+        rowHTML += "<th>" + '<a href="single-movie.html?id=' + resultData[i]["movie_id"] + '">' + resultData[i]["movie_title"] + "</a>" + "</th>";
         rowHTML += "<th>" + resultData[i]["movie_year"] + "</th>";
         rowHTML += "<th>" + resultData[i]["movie_director"] + "</th>";
         rowHTML += "</tr>";
