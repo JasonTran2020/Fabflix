@@ -1,0 +1,26 @@
+
+table{
+    width:100%;
+}
+
+h1{
+    text-align: center;
+}
+
+p{
+    text-align: center;
+}
+
+/*# is for id*/
+#table_headline{
+    background-color: var(--md-sys-color-primary-light);
+    color: var(--md-sys-color-on-primary-light)
+}
+/*. is for class*/
+
+
+
+/*: is for pseudo-classes*/
+tr:nth-child(even){
+    background-color: var(--md-sys-color-secondary-container-light);
+}

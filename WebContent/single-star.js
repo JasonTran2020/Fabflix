@@ -45,7 +45,7 @@ function handleResult(resultData) {
     let starInfoElement = jQuery("#star_info");
 
     // append two html <p> created to the h3 body, which will refresh the page
-    starInfoElement.append("<p>Star Name: " + resultData[0]["star_name"] + "</p>" +
+    starInfoElement.append("<h1>" +"<strong>" + resultData[0]["star_name"] + "</strong>" + "</h1>" +
         "<p>Date Of Birth: " + resultData[0]["star_dob"] + "</p>");
 
     console.log("handleResult: populating movie table from resultData");
@@ -57,13 +57,18 @@ function handleResult(resultData) {
     // Concatenate the html tags with resultData jsonObject to create table rows
     for (let i = 0; i < Math.min(10, resultData.length); i++) {
         let rowHTML = "";
+
         rowHTML += "<tr>";
+        rowHTML += "<div >";
         //REMEMEMBER, THE URL LITERALLY HAS TO BE IN DOUBLE QUOTES. Hence, we use single quotes to allow double quotes in the string itself
         // the url has to ("single-movie.html?id=wlo"), not just (single-movie.html?id=wlo)
-        rowHTML += "<th>" + '<a href="single-movie.html?id=' + resultData[i]["movie_id"] + '">' + resultData[i]["movie_title"] + "</a>" + "</th>";
-        rowHTML += "<th>" + resultData[i]["movie_year"] + "</th>";
-        rowHTML += "<th>" + resultData[i]["movie_director"] + "</th>";
+        //There has to be a better way than applying headline-large to every single tow
+        rowHTML += "<th class='headline-large'>" + '<a href="single-movie.html?id=' + resultData[i]["movie_id"] + '">' + resultData[i]["movie_title"] + "</a>" + "</th>";
+        rowHTML += "<th class='headline-large'>" + resultData[i]["movie_year"] + "</th>";
+        rowHTML += "<th class='headline-large'>" + resultData[i]["movie_director"] + "</th>";
+        rowHTML += "<div/>"
         rowHTML += "</tr>";
+
 
         // Append the row created to the table body, which will refresh the page
         movieTableBodyElement.append(rowHTML);

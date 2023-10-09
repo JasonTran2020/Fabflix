@@ -74,6 +74,10 @@ public class SingleStarServlet extends HttpServlet {
                 String starId = rs.getString("starId");
                 String starName = rs.getString("name");
                 String starDob = rs.getString("birthYear");
+                //Boolean based on the last column that was read, i.e, birthyear in this case
+                if (rs.wasNull()) {
+                    starDob = "N/A"; // set it "N/A" if the birthYear was null.
+                }
 
                 String movieId = rs.getString("movieId");
                 String movieTitle = rs.getString("title");
