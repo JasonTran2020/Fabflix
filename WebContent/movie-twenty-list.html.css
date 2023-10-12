@@ -17,3 +17,7 @@ div{
     background-color: var(--md-sys-color-secondary-container-light);
     color: var(--md-sys-color-on-secondary-container-light);
 }
+
+.movie-title{
+    color: var(--md-sys-color-on-primary-light)
+}

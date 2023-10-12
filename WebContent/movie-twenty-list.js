@@ -12,10 +12,10 @@ function handleMovieListResult(resultData){
         //Breaking down the stars array of json objects into a single string of their names
         let stars = jsonObject["stars"];
         let genres = jsonObject["genres"]
-        let starString = limitedList(stars,3,"name");
-        let genreString =limitedList(genres,3,"name");
+        let starString = limitedListLinked(stars,3,"name","id","single-star.html?id=");
+        let genreString =limitedList(genres,3,"name","id","single-movie.html?id=");
 
-        entryHTML +='<dt class="headline-medium">' + "<em>" + jsonObject["title"]  + "</em>" +' ('+jsonObject["rating"] + ')' + "<dt/>";
+        entryHTML +='<dt class="headline-medium">' + "<a class=" + '"movie-title" ' + "href=single-movie.html?id=" + jsonObject["movie_id"] + ">" + jsonObject["title"]  + "</a>" +' ('+jsonObject["rating"] + ')' + "<dt/>";
         entryHTML += '<div >';
         entryHTML += "<dd class='headline-small'>" + "<strong>" + 'Directed by: ' + "</strong>" + jsonObject["director"] + "</dd>";
         entryHTML += "<dd class='headline-small'>" + "<strong>" + 'Release date: ' + "</strong>" + jsonObject["year"] + "</dd>";
@@ -29,21 +29,45 @@ function handleMovieListResult(resultData){
     }
 }
 
-function limitedList(theList,limit,propertyName){
 
+function limitedList(theList,limit,propertyName){
     let result ="";
     for (let x = 0; x <Math.min(limit, theList.length);x++){
 
-        let name = theList[x][propertyName]
+        let name = theList[x][propertyName];
+
         //Condition to put and at the end
+
         if (x===limit-1 && theList.length===limit){
             result+="and "+name;
         }
         else if (x===2){
-            result+=name + "...";
+            result+= name + "...";
         }
         else{
-            result+=name+", ";
+            result+= name +", ";
+        }
+    }
+    return result
+}
+//Yea this function is a bit specific. Only useful for making links that take one parameter
+function limitedListLinked(theList,limit,propertyName,idName,endPoint){
+
+    let result ="";
+    for (let x = 0; x <Math.min(limit, theList.length);x++){
+
+        let name = theList[x][propertyName];
+        let id = theList[x][idName];
+        //Condition to put and at the end
+        let linkedName= "<a href=" + endPoint + id + ">" + name + "<a/>";
+        if (x===limit-1 && theList.length===limit){
+            result+="and "+linkedName;
+        }
+        else if (x===2){
+            result+= linkedName + "...";
+        }
+        else{
+            result+= linkedName +", ";
         }
     }
     return result
