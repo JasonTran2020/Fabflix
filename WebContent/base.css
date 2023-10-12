@@ -3,7 +3,7 @@
 body{
     background-color: var(--md-sys-color-background-light);
     color: var(--md-sys-color-on-background-light);
-}
-tbody{
-
+    /*Need these to be 0 if you want the width to take the entire page, instead of having a tiny but noticeable gap*/
+    margin:0;
+    padding:0;
 }

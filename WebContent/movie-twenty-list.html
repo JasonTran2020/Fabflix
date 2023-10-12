@@ -3,13 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <title>Yes this is the movielist page</title>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
-          integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <!--The file containing pretty much all the variables. YOU NEED THIS so that the other CSS files know what values their variables are actually referencing-->
+    <link rel="stylesheet" href="general-css-files/tokens.css">
+    <link rel="stylesheet" href="general-css-files/typography.module.css">
+    <!-- The base CSS file -->
+    <link rel="stylesheet" href="base.css">
+    <!-- If this file need something different, then it will be override by the single-star.css, as it is declared after the base.css file -->
+    <link rel="stylesheet" href="movie-twenty-list.html.css">
 
 </head>
 <body>
 
-<h1>Top 20 movies!</h1>
+<h1 class="headline-large">Top 20 movies!</h1>
 <dlist id="test_body"></dlist>
 <!-- Load jQuery and Bootstrap JS. Copied and pasted this from example file -->
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>

@@ -15,11 +15,13 @@ function handleMovieListResult(resultData){
         let starString = limitedList(stars,3,"name");
         let genreString =limitedList(genres,3,"name");
 
-        entryHTML +="<dt>" + jsonObject["title"] + ' ('+jsonObject["rating"] + ')' + "<dt/>";
-        entryHTML += "<dd>" + 'Directed by: ' + jsonObject["director"] + "</dd>";
-        entryHTML += "<dd>" + 'Release date: ' + jsonObject["year"] + "</dd>";
-        entryHTML += "<dd>" + 'Starring: ' + starString + "<dd/>";
-        entryHTML += "<dd>" + 'Genres: ' + genreString + "<dd/>";
+        entryHTML +='<dt class="headline-medium">' + "<em>" + jsonObject["title"]  + "</em>" +' ('+jsonObject["rating"] + ')' + "<dt/>";
+        entryHTML += '<div >';
+        entryHTML += "<dd class='headline-small'>" + "<strong>" + 'Directed by: ' + "</strong>" + jsonObject["director"] + "</dd>";
+        entryHTML += "<dd class='headline-small'>" + "<strong>" + 'Release date: ' + "</strong>" + jsonObject["year"] + "</dd>";
+        entryHTML += "<dd class='headline-small'>" + "<strong>" + 'Starring: ' + "</strong>" + starString + "<dd/>";
+        entryHTML += "<dd class='headline-small'>" + "<strong>" + 'Genres: '  + "</strong>" + genreString + "<dd/>";
+        entryHTML += '</div>'
 
 
         testBodyElement.append(entryHTML);
