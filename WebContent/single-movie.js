@@ -4,27 +4,26 @@ function handleMovieResult(resultData){
 
     let testBodyElement = jQuery("#test_body");
 
-    for (let i = 0; i < resultData.length; i++){
+    let jsonObject=resultData[i];
+    let entryHTML = "";
 
-        let jsonObject=resultData[i];
-        let entryHTML = "";
+    //Breaking down the stars array of json objects into a single string of their names
+    let stars = jsonObject["stars"];
+    let genres = jsonObject["genres"]
+    let starString = getList(stars,"name");
+    let genreString= getList(genres,"name");
 
-        //Breaking down the stars array of json objects into a single string of their names
-        let stars = jsonObject["stars"];
-        let genres = jsonObject["genres"]
-        let starString = getList(stars,"name");
-        let genreString= getList(genres,"name");
-
-        entryHTML +="<dt>" + jsonObject["title"] + ' ('+jsonObject["rating"] + ')' + "<dt/>";
-        entryHTML += "<dd>" + 'Directed by: ' + jsonObject["director"] + "</dd>";
-        entryHTML += "<dd>" + 'Release date: ' + jsonObject["year"] + "</dd>";
-        entryHTML += "<dd>" + 'Starring: ' + starString + "<dd/>";
-        entryHTML += "<dd>" + 'Genres: ' + genreString + "<dd/>";
+    entryHTML +="<dt>" + jsonObject["title"] + ' ('+jsonObject["rating"] + ')' + "<dt/>";
+    entryHTML += "<dd>" + 'Directed by: ' + jsonObject["director"] + "</dd>";
+    entryHTML += "<dd>" + 'Release date: ' + jsonObject["year"] + "</dd>";
+    entryHTML += "<dd>" + 'Rating: ' + jsonObject["rating"] + "<dd/>";
+    entryHTML += "<dd>" + 'Starring: ' + starString + "<dd/>";
+    entryHTML += "<dd>" + 'Genres: ' + genreString + "<dd/>";
 
 
-        testBodyElement.append(entryHTML);
+    testBodyElement.append(entryHTML);
 
-    }
+
 }
 
 function getList(theList, propertyName){

@@ -95,7 +95,7 @@ public class SingleMovieServlet extends HttpServlet {
                 jsonObject.addProperty("movie_title", movieTitle);
                 jsonObject.addProperty("movie_year", movieYear);
                 jsonObject.addProperty("movie_director", movieDirector);
-
+                jsonObject.addProperty("rating", rating);
                 //Adding the genres was relegated to a separate function
                 this.addGenres(movieId,jsonObject,genreResultSet);
 
