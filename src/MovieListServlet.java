@@ -105,6 +105,9 @@ public class MovieListServlet extends HttpServlet {
             // Log to localhost log
             req.getServletContext().log("getting " + jsonArray.size() + " results");
             out.write(jsonArray.toString());
+            //Close the prepared statements
+            genreStatement.close();
+            starsStatement.close();
             // Set response status to 200 (OK)
             resp.setStatus(200);
 
@@ -120,6 +123,7 @@ public class MovieListServlet extends HttpServlet {
 
         }
         finally {
+
             out.close();
         }
     }
