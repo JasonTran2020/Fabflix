@@ -49,6 +49,6 @@ function getList(theList, propertyName){
 jQuery.ajax({
     dataType: "json", // Setting return data type
     method: "GET", // Setting request method
-    url: "/api/single-movie", // Setting request url, which is mapped by MovieListSerLet in MovieListSerLet.java
+    url: "api/single-movie", // Setting request url, which is mapped by MovieListSerLet in MovieListSerLet.java
     success: (resultData) => handleMovieResult(resultData) // Setting callback function to handle data returned successfully by the StarsServlet
 });
