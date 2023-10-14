@@ -3,6 +3,7 @@
 Yes the base of this is just the API example
 
 Project 1:
+
 Jason Tran's work:
 * Created movie-twenty-list html, javascript, and java servlet
 * Edited single-star html, javascript, and java servlet from api-example to meet project requirements
