@@ -1,6 +1,7 @@
 ## CS 122B Project 
 
 Yes the base of this is just the API example
+
 ---------\
 Project 1\:
 ---------\
