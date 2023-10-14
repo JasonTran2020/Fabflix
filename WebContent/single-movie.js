@@ -33,7 +33,7 @@ function getParameterByName(target) {
 function handleMovieResult(resultData){
     console.log("Hey, the success callback function was called");
     let movieName = jQuery("#movie_name");
-    movieName.append("<strong>" + resultData[0]["movie_title"] + "</strong>" + ' ('+resultData[0]["rating"]);
+    movieName.append("<strong>" + resultData[0]["movie_title"] + "</strong>" + ' ('+resultData[0]["rating"] + ')' );
 
     let entryHTML = "";
 
@@ -41,8 +41,8 @@ function handleMovieResult(resultData){
     //Breaking down the stars array of json objects into a single string of their names
     let stars = resultData[0]["stars"];
     let genres = resultData[0]["genres"]
-    let starString = getList(stars,"name");
-    let genreString= getList(genres,"name");
+    let starString = getList(stars,"name", 1);
+    let genreString= getList(genres,"name", 0);
 
     entryHTML += "<dd>" + 'Directed by: ' + resultData[0]["movie_director"] + "</dd>";
     entryHTML += "<dd>" + 'Release date: ' + resultData[0]["movie_year"] + "</dd>";
@@ -55,17 +55,33 @@ function handleMovieResult(resultData){
 
 }
 
-function getList(theList, propertyName){
+function getList(theList, propertyName, flag){
     let result ="";
     for (let x = 0; x < theList.length;x++){
 
         let name = theList[x][propertyName]
         //Condition to put and at the end for last star/genre
-        if (x == theList.length - 1){
-            result+="and "+name;
+        if (x == 0 &&  theList.length == 1) {
+            result += name;
+        }
+        else if (x == theList.length - 1){
+            if (flag ==  1) {
+                result += "and ";
+                result += '<a href="single-star.html?id=' + theList[x]["id"] + '">' + name + "</a>";
+            }
+            else{
+                result+="and "+name;
+            }
+
         }
         else{
-            result+=name+", ";
+            if (flag == 1) {
+                result += '<a href="single-star.html?id=' + theList[x]["id"] + '">' + name + "</a>";
+                result += ", ";
+            }
+            else {
+                result += name + ", ";
+            }
         }
     }
     return result

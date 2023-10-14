@@ -74,6 +74,7 @@ public class SingleMovieServlet extends HttpServlet {
             while (resultSet.next()) {
 
                 //Add arguments to the statement before executing
+                String starId = resultSet.getString("starId");
                 String starName = resultSet.getString("name");
                 String movieId = resultSet.getString("movieId");
                 String movieTitle = resultSet.getString("title");
@@ -90,6 +91,7 @@ public class SingleMovieServlet extends HttpServlet {
                 // Create a JsonObject based on the data we retrieve from rs
 
                 JsonObject jsonObject = new JsonObject();
+                jsonObject.addProperty("star_id", starId);
                 jsonObject.addProperty("star_name", starName);
                 jsonObject.addProperty("movie_id", movieId);
                 jsonObject.addProperty("movie_title", movieTitle);
