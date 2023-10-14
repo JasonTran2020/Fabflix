@@ -13,7 +13,7 @@ p{
 
 /*# is for id*/
 #table_headline{
-    background-color: var(--md-sys-color-primary-light);
+    background-color: #0aa37a;
     color: var(--md-sys-color-on-primary-light)
 }
 /*. is for class*/
@@ -23,4 +23,9 @@ p{
 /*: is for pseudo-classes*/
 tr:nth-child(even){
     background-color: var(--md-sys-color-secondary-container-light);
+}
+
+body {
+    height: 100vh;
+    background-image: url('https://static.vecteezy.com/system/resources/previews/011/589/026/original/aesthetic-sage-green-background-free-vector.jpg');
 }

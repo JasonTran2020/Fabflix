@@ -1,0 +1,18 @@
+h1{
+    background-color: coral;
+    color: var(--md-sys-color-on-primary-light);
+    padding: 8px;
+    font-size: 100px;
+}
+
+dd{
+    background-color: #f08080;
+    color: black;
+    padding: 8px;
+    font-size: 40px;
+}
+
+body {
+    height: 100vh;
+    background-image: url('https://codetheweb.blog/assets/img/posts/css-advanced-background-images/mountains.jpg');
+}

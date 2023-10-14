@@ -14,10 +14,15 @@ dt{
 }
 
 div{
-    background-color: var(--md-sys-color-secondary-container-light);
     color: var(--md-sys-color-on-secondary-container-light);
 }
 
 .movie-title{
     color: var(--md-sys-color-on-primary-light)
+}
+
+body{
+    height: 100vh;
+    background-image: url('https://www.toptal.com/designers/subtlepatterns/uploads/organic-tiles.png');
+
 }
