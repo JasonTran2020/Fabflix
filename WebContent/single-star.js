@@ -57,18 +57,22 @@ function handleResult(resultData) {
     // Concatenate the html tags with resultData jsonObject to create table rows
     let rowHTML = "";
 
-    rowHTML += "<tr>";
-    rowHTML += "<div >";
-    //REMEMEMBER, THE URL LITERALLY HAS TO BE IN DOUBLE QUOTES. Hence, we use single quotes to allow double quotes in the string itself
-    // the url has to ("single-movie.html?id=wlo"), not just (single-movie.html?id=wlo)
-    //There has to be a better way than applying headline-large to every single tow
-    rowHTML += "<th class='headline-large'>" + '<a href="single-movie.html?id=' + resultData[i]["movie_id"] + '">' + resultData[i]["movie_title"] + "</a>" + "</th>";
-    rowHTML += "<th class='headline-large'>" + resultData[i]["movie_year"] + "</th>";
-    rowHTML += "<th class='headline-large'>" + resultData[i]["movie_director"] + "</th>";
-    rowHTML += "<div/>"
-    rowHTML += "</tr>";
+    for (i = 0; i < resultData.length; i++)
+    {
 
 
+        rowHTML += "<tr>";
+        rowHTML += "<div >";
+        //REMEMEMBER, THE URL LITERALLY HAS TO BE IN DOUBLE QUOTES. Hence, we use single quotes to allow double quotes in the string itself
+        // the url has to ("single-movie.html?id=wlo"), not just (single-movie.html?id=wlo)
+        //There has to be a better way than applying headline-large to every single tow
+        rowHTML += "<th class='headline-large'>" + '<a href="single-movie.html?id=' + resultData[i]["movie_id"] + '">' + resultData[i]["movie_title"] + "</a>" + "</th>";
+        rowHTML += "<th class='headline-large'>" + resultData[i]["movie_year"] + "</th>";
+        rowHTML += "<th class='headline-large'>" + resultData[i]["movie_director"] + "</th>";
+        rowHTML += "<div/>"
+        rowHTML += "</tr>";
+
+    }
     // Append the row created to the table body, which will refresh the page
     movieTableBodyElement.append(rowHTML);
 
