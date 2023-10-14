@@ -35,16 +35,24 @@ function limitedList(theList,limit,propertyName){
     for (let x = 0; x <Math.min(limit, theList.length);x++){
 
         let name = theList[x][propertyName];
+        // if there is just one genre only to be displayed
+        if (x === 0 && Math.min(limit, theList.length) === 1){
+            result += name;
+        }
 
-        //Condition to put and at the end
-
-        if (x===limit-1 && theList.length===limit){
+        //Condition to put and at the end if the genres is within the limit
+        else if (x === Math.min(limit, theList.length)-1 && theList.length <= limit){
             result+="and "+name;
         }
+        // If there are more than 3 genres
         else if (x===2){
             result+= name + "...";
         }
-        else{
+
+        else if (x === Math.min(limit, theList.length)-2) {
+            result += name + " ";
+        }
+        else {
             result+= name +", ";
         }
     }

@@ -60,10 +60,11 @@ function getList(theList, propertyName, flag){
     for (let x = 0; x < theList.length;x++){
 
         let name = theList[x][propertyName]
-        //Condition to put and at the end for last star/genre
+
         if (x == 0 &&  theList.length == 1) {
             result += name;
         }
+        //Condition to put and at the end for last star/genre
         else if (x == theList.length - 1){
             if (flag ==  1) {
                 result += "and ";
@@ -80,7 +81,12 @@ function getList(theList, propertyName, flag){
                 result += ", ";
             }
             else {
-                result += name + ", ";
+                if (x == theList.length - 2){
+                    result += name + " ";
+                }
+                else {
+                    result += name + ", ";
+                }
             }
         }
     }
