@@ -1,6 +1,7 @@
 
 table{
     width:100%;
+    border-collapse: collapse;
 }
 
 h1{
@@ -13,8 +14,16 @@ p{
 
 /*# is for id*/
 #table_headline{
-    background-color: #0aa37a;
-    color: var(--md-sys-color-on-primary-light)
+
+    background: var(--md-sys-color-primary-light);
+    border-color: var(--md-sys-color-primary-light);
+    color: var(--md-sys-color-on-primary-light);
+    box-shadow: 0 4px 8px 0 var(--md-sys-color-primary-light);
+    border: none;
+    border-spacing: 0;
+    border-collapse: collapse;
+    margin: 0px;
+    padding: 0;
 }
 /*. is for class*/
 
@@ -26,6 +35,7 @@ tr:nth-child(even){
 }
 
 body {
-    height: 100vh;
-    background-image: url('https://static.vecteezy.com/system/resources/previews/011/589/026/original/aesthetic-sage-green-background-free-vector.jpg');
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-image: url('https://img.freepik.com/free-vector/blue-polygonal-shapes-background_1053-434.jpg');
 }

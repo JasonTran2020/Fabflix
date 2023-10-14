@@ -15,7 +15,7 @@ function handleMovieListResult(resultData){
         let starString = limitedListLinked(stars,3,"name","id","single-star.html?id=");
         let genreString =limitedList(genres,3,"name","id","single-movie.html?id=");
 
-        entryHTML +='<dt class="headline-medium">' + "<a class=" + '"movie-title" ' + "href=single-movie.html?id=" + jsonObject["movie_id"] + ">" + jsonObject["title"]  + "</a>" +' ('+jsonObject["rating"] + ')' + "<dt/>";
+        entryHTML +='<dt class="headline-medium">' + (i+1) + ". " + "<a class=" + '"movie-title" ' + "href=single-movie.html?id=" + jsonObject["movie_id"] + ">" + jsonObject["title"]  + "</a>" +' ('+jsonObject["rating"] + ')' + "<dt/>";
         entryHTML += '<div >';
         entryHTML += "<dd class='headline-small'>" + "<strong>" + 'Directed by: ' + "</strong>" + jsonObject["director"] + "</dd>";
         entryHTML += "<dd class='headline-small'>" + "<strong>" + 'Release date: ' + "</strong>" + jsonObject["year"] + "</dd>";

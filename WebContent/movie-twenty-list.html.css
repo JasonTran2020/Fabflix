@@ -11,6 +11,10 @@ dt{
     background-color: var(--md-sys-color-primary-light);
     color: var(--md-sys-color-on-primary-light);
     padding: 8px;
+
+    box-shadow: 0 4px 8px 0 var(--md-sys-color-primary-light);
+
+
 }
 
 div{
