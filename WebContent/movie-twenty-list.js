@@ -2,7 +2,7 @@
 function handleMovieListResult(resultData){
     console.log("Hey, the success callback function was called");
 
-    let testBodyElement = jQuery("#test_body");
+    let testBodyElement = jQuery("#movie_table");
 
     for (let i = 0; i < Math.min(resultData.length,20); i++){
 
@@ -15,13 +15,24 @@ function handleMovieListResult(resultData){
         let starString = limitedListLinked(stars,3,"name","id","single-star.html?id=");
         let genreString =limitedList(genres,3,"name","id","single-movie.html?id=");
 
-        entryHTML +='<dt class="headline-medium">' + (i+1) + ". " + "<a class=" + '"movie-title" ' + "href=single-movie.html?id=" + jsonObject["movie_id"] + ">" + jsonObject["title"]  + "</a>" +' ('+jsonObject["rating"] + ')' + "<dt/>";
-        entryHTML += '<div >';
-        entryHTML += "<dd class='headline-small'>" + "<strong>" + 'Directed by: ' + "</strong>" + jsonObject["director"] + "</dd>";
-        entryHTML += "<dd class='headline-small'>" + "<strong>" + 'Release date: ' + "</strong>" + jsonObject["year"] + "</dd>";
-        entryHTML += "<dd class='headline-small'>" + "<strong>" + 'Starring: ' + "</strong>" + starString + "<dd/>";
-        entryHTML += "<dd class='headline-small'>" + "<strong>" + 'Genres: '  + "</strong>" + genreString + "<dd/>";
-        entryHTML += '</div>'
+        //Old way that used description list. Honestly not that good given the lack of a movie image, so all the content ends up being on the left with an empty center and right
+        //Could center it, but doesn't make a ton of sense either given the lack of contenent and yet huge amount of vertical space taken
+        // entryHTML +='<dt class="headline-medium">' + (i+1) + ". " + "<a class=" + '"movie-title" ' + "href=single-movie.html?id=" + jsonObject["movie_id"] + ">" + jsonObject["title"]  + "</a>" +' ('+jsonObject["rating"] + ')' + "<dt/>";
+        // entryHTML += '<div >';
+        // entryHTML += "<dd class='headline-small'>" + "<strong>" + 'Directed by: ' + "</strong>" + jsonObject["director"] + "</dd>";
+        // entryHTML += "<dd class='headline-small'>" + "<strong>" + 'Release date: ' + "</strong>" + jsonObject["year"] + "</dd>";
+        // entryHTML += "<dd class='headline-small'>" + "<strong>" + 'Starring: ' + "</strong>" + starString + "<dd/>";
+        // entryHTML += "<dd class='headline-small'>" + "<strong>" + 'Genres: '  + "</strong>" + genreString + "<dd/>";
+        // entryHTML += '</div>'
+        entryHTML += "<tr>";
+        entryHTML += "<td class='headline-medium'>" + "#" + (i+1) + "</td>";
+        entryHTML += "<td class='headline-medium'>" + "<a class=" + '"movie-title" ' + "href=single-movie.html?id=" + jsonObject["movie_id"] + ">" + jsonObject["title"]  + "</a>" + "</td>";
+        entryHTML += "<td class='headline-medium'>" + jsonObject["year"] + "</td>";
+        entryHTML += "<td class='headline-medium'>" + jsonObject["director"] + "</td>";
+        entryHTML += "<td class='headline-medium'>" + genreString + "</td>";
+        entryHTML += "<td class='headline-medium'>" + starString + "</td>";
+        entryHTML += "</tr>";
+
 
 
         testBodyElement.append(entryHTML);
