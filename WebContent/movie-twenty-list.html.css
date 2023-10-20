@@ -41,9 +41,6 @@ table tr:last-child td:last-child {
     border-radius: 0 0 12px 0;
 }
 
-div{
-    color: var(--md-sys-color-on-secondary-container-light);
-}
 td {
     padding-top:20px;
     padding-bottom:20px;

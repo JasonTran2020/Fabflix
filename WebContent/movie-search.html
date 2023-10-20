@@ -14,8 +14,53 @@
 
 </head>
 <body>
-<h1 class="headline-large">Top 20 movies!</h1>
+    <h1 class="headline-large">Searching movies</h1>
+    <div class="topbar">
+        <a href="#home">Home</a>
+        <form action="movie-search.html">
+        <label>
+            <input type="text" name="title" placeholder="Movie title">
+        </label>
+        <label>
+            <input type="text" name="director" placeholder="Director">
+        </label>
+        <label>
+            <input type="number" name="year" min="1888" max="2100" placeholder="year">
+        </label>
+        <label>
+            <input type="text" name="star" placeholder="Star name">
+        </label>
+        <label>
+            <input type="submit" value="Search">
+        </label>
+        </form>
+    </div>
+    <table>
+        <thead>
+        <tr id="table_headline">
+            <!-- A BETTER WAY???? -->
+            <th class='headline-large'>#</th>
+            <th class='headline-large'>Movie Title</th>
+            <th class='headline-large'>Rating</th>
+            <th class='headline-large'>Year</th>
+            <th class='headline-large'>Director</th>
+            <th class='headline-large'>Genres</th>
+            <th class='headline-large'>Stars</th>
 
+        </tr>
+        </thead>
 
+        <tbody id="movie_table">
+
+        </tbody>
+    </table>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+
+<!-- Necessary utility file for movie-search.js to function -->
+<script src="util-movie-list.js"></script>
+<script src="movie-search.js"></script>
 </body>
 </html>
