@@ -6,4 +6,38 @@ body{
     /*Need these to be 0 if you want the width to take the entire page, instead of having a tiny but noticeable gap*/
     margin:0;
     padding:0;
+    background-image: url('https://www.toptal.com/designers/subtlepatterns/uploads/organic-tiles.png');
+}
+
+h1,h2{
+    text-align: center;
+    background-color: var(--md-sys-color-primary-light);
+    color: var(--md-sys-color-on-primary-light)
+}
+
+td {
+    padding-top:20px;
+    padding-bottom:20px;
+    padding-right:20px;
+}
+tr{
+    background-color: var(--md-sys-color-secondary-container-light);
+    padding: 12px;
+}
+tr:nth-child(even){
+    background-color: var(--md-sys-color-background-light);
+}
+
+
+table{
+    width:99%;
+
+    border-collapse: collapse;
+    border-radius: 10px;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 8px;
+    background-color: var(--md-sys-color-secondary-container-light);
+    box-shadow: 0 4px 8px 0 var(--md-sys-color-secondary-container-light);
+
 }
