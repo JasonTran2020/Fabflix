@@ -33,6 +33,8 @@ public class MovieSearchServlet extends HttpServlet {
     //Would make sense to be able to search for multiple stars, but rubric seems to just ask for one. Might change later
     //private List<HttpRequestAttribute<String>> starsAttribute;
     private HttpRequestAttribute<String> starAttribute;
+    private HttpRequestAttribute<String> browsingAttribute;
+    private HttpRequestAttribute<String> genreNameAttribute;
 
     public void init(ServletConfig config) {
         //Initialize RequestAttributes here with new objects.
@@ -40,6 +42,9 @@ public class MovieSearchServlet extends HttpServlet {
         yearAttribute = new HttpRequestAttribute<>(String.class,"year");
         directorAttribute = new HttpRequestAttribute<>(String.class,"director");
         starAttribute = new HttpRequestAttribute<>(String.class,"star");
+
+        browsingAttribute = new HttpRequestAttribute<>(String.class,"browsing");
+        genreNameAttribute = new HttpRequestAttribute<>(String.class,"genre");
         try {
             dataSource = (DataSource) new InitialContext().lookup("java:comp/env/jdbc/moviedbexample");
         } catch (NamingException e) {
@@ -55,15 +60,20 @@ public class MovieSearchServlet extends HttpServlet {
         // Output stream to STDOUT
         PrintWriter out = resp.getWriter();
 
-
-
         try (Connection conn = dataSource.getConnection()){
             // Vast majority of this was dervied from MovietListServlet. Check for more detailed comments. Comments here are more specific to searching
 
             //Build out a query and arguments using parameters from the HttpServletRequest which may contain the title, year, director, and/or star
             //Making a prepare statement as the arguments come from a user with potential malicious intent of using SQL injection
-            PreparedStatement statement = buildSearchPrepareStatement(req,conn);
-  
+            String isBrowsing = browsingAttribute.get(req);
+            PreparedStatement statement;
+            if (isBrowsing!=null && isBrowsing.equals("true")){
+                statement = buildBrowsePrepareStatement(req,conn);
+            }
+            else{
+                statement = buildSearchPrepareStatement(req,conn);
+            }
+
             ResultSet resultSet = statement.executeQuery();
 
             //Convert stuff from resultSet into jsonArray because we said the content type we were going to do that
@@ -111,7 +121,7 @@ public class MovieSearchServlet extends HttpServlet {
         ArrayList<String> args = new ArrayList<>();
         String result;
         //Assumption that star is null, in which we don't need to
-        if (star==null){
+        if (star==null || star.isEmpty()){
             result= "SELECT * FROM movies AS m, ratings AS r WHERE (r.movieId = m.id) ";
         }
         //star is not NULL
@@ -122,7 +132,7 @@ public class MovieSearchServlet extends HttpServlet {
         }
 
         //LIKE is case sensitive, ILIKE is case insensitive. Think ILIKE is more reasonable in this case
-        if (title!=null /*&& first*/){
+        if (title!=null /*&& first*/ && !title.isEmpty()){
             result += " AND " + this.buildLikeQueryString(title,"m.title", args);
             //first = false;
         }
@@ -131,11 +141,11 @@ public class MovieSearchServlet extends HttpServlet {
 //        }
 
 
-        if (director != null){
+        if (director != null && !director.isEmpty()){
             result += " AND " + this.buildLikeQueryString(director, "m.director",args);
         }
 
-        if (year != null /*&& first*/){
+        if (year != null  && !year.isEmpty()){
             result += " AND ( m.year = ?" + ") ";
             //Manually add year here as we don't use the buildLikeQueryString method here
             args.add(year);
@@ -146,18 +156,24 @@ public class MovieSearchServlet extends HttpServlet {
 //        }
         //Terminate the statement
         result +=" ORDER BY (r.rating) DESC;";
-        request.getServletContext().log(TAG + "The complete SQL statement is \"" + result + "\"");
+        request.getServletContext().log(TAG + " The complete SQL statement is \"" + result + "\"");
+        request.getServletContext().log(TAG + " The number of args are \"" + args.size() + "\"");
+        request.getServletContext().log(TAG + " Args are \"" + args.toString() + "\"");
         PreparedStatement statement = conn.prepareStatement(result);
         //Making a prepare statement as the arguments come from a user with potential malicious intent of using SQL injection
 
         for (int x = 0; x < args.size(); x++){
             //The only argument in this whole statement that would NOT be a string is the year, which will have a special if statement to use setInt instead
             //setString works locally, BUT, there is no assruance that it will work with other db drivers, so let's just be careful and use setInt
-            if (x == args.size()-1 && year !=null){
+            //Have to check that year is both not null and not empty. Possible to have a year="" by manipulating url
+            if (x == args.size()-1 && year !=null && !year.isEmpty()){
                 statement.setInt(x+1,Integer.parseInt(args.get(x)));
             }
-            //Remember, SQL is 1-based index
-            statement.setString(x+1, args.get(x));
+            else{
+                //Remember, SQL is 1-based index
+                statement.setString(x+1, args.get(x));
+            }
+
         }
         return statement;
 
@@ -187,6 +203,28 @@ public class MovieSearchServlet extends HttpServlet {
         }
         result.append(")");
         return result.toString();
+
+    }
+
+    private PreparedStatement buildBrowsePrepareStatement(HttpServletRequest request,Connection conn) throws SQLException {
+        String genre = genreNameAttribute.get(request);
+        ArrayList<String> args = new ArrayList<>();
+        String result = "SELECT * FROM movies AS m, ratings AS r, genres_in_movies AS gim , genres AS g  WHERE (gim.genreId = g.id) AND (gim.movieId = m.id) AND (r.movieId = m.id) ";
+        if (genre!=null && !genre.isEmpty()){
+            result+=" AND (g.name = ?) ";
+            args.add(genre);
+        }
+
+        result +=" ORDER BY (r.rating) DESC;";
+        request.getServletContext().log(TAG + " The complete SQL statement is \"" + result + "\"");
+        request.getServletContext().log(TAG + " The number of args are \"" + args.size() + "\"");
+        request.getServletContext().log(TAG + " Args are \"" + args.toString() + "\"");
+        PreparedStatement statement = conn.prepareStatement(result);
+        for (int x = 0; x < args.size(); x++){
+            //Remember, SQL is 1-based index
+            statement.setString(x+1, args.get(x));
+        }
+        return statement;
 
     }
 

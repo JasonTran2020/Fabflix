@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Flix Home</title>
+  <!--The file containing pretty much all the variables. YOU NEED THIS so that the other CSS files know what values their variables are actually referencing-->
+  <link rel="stylesheet" href="general-css-files/tokens.css">
+  <link rel="stylesheet" href="general-css-files/typography.module.css">
+  <!-- The base CSS file -->
+  <link rel="stylesheet" href="base.css">
+</head>
+<body>
+    <h1 class="headline-large">Home</h1>
+
+    <h2 class="headline-large"> <a href="movie-search.html"> Search movies</a> <br> Or</h2>
+    <h2 class="headline-large"> Browse some genres!</h2>
+    <table>
+        <tbody id="genre_table">
+
+        </tbody>
+    </table>
+
+    <!-- Load jQuery and Bootstrap JS. Copied and pasted this from example file -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+
+    <script src="home.js"></script>
+</body>
+</html>

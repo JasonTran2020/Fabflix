@@ -15,12 +15,32 @@
 <body>
 
 <h1 class="headline-large">Top 20 movies!</h1>
-<dlist id="test_body"></dlist>
+<table>
+    <thead>
+    <tr id="table_headline">
+        <!-- A BETTER WAY???? -->
+        <th class='headline-large'>#</th>
+        <th class='headline-large'>Movie Title</th>
+        <th class='headline-large'>Rating</th>
+        <th class='headline-large'>Year</th>
+        <th class='headline-large'>Director</th>
+        <th class='headline-large'>Genres</th>
+        <th class='headline-large'>Stars</th>
+
+    </tr>
+    </thead>
+
+    <tbody id="movie_table">
+
+    </tbody>
+</table>
 <!-- Load jQuery and Bootstrap JS. Copied and pasted this from example file -->
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
 
+<!-- Necessary utility file for movie-twenty-list.js to function -->
+<script src="util-movie-list.js"></script>
 <script src="movie-twenty-list.js"></script>
 
 </body>

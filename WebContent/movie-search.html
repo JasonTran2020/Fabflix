@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Search movies</title>
+    <!--The file containing pretty much all the variables. YOU NEED THIS so that the other CSS files know what values their variables are actually referencing-->
+    <link rel="stylesheet" href="general-css-files/tokens.css">
+    <link rel="stylesheet" href="general-css-files/typography.module.css">
+    <!-- The base CSS file -->
+    <link rel="stylesheet" href="base.css">
+    <!-- If this file need something different, then it will be override by the single-star.css, as it is declared after the base.css file -->
+    <!-- Temporarily using the moviet-twenty-list.html.css (what is with that name?), but will likely stay due to performing similar roles -->
+    <link rel="stylesheet" href="movie-twenty-list.html.css">
+
+</head>
+<body>
+    <h1 class="headline-large">Searching movies</h1>
+    <div class="topbar">
+        <a href="#home">Home</a>
+        <form id="searchForm" action="movie-search.html" onsubmit="return submitSearchForm(this)">
+        <label>
+            <input type="text" name="title" placeholder="Movie title" value="">
+        </label>
+        <label>
+            <input id="nonono" type="text" name="director" placeholder="Director" value="">
+        </label>
+        <label>
+            <input type="number" name="year" min="1888" max="2100" placeholder="year" value="">
+        </label>
+        <label>
+            <input type="text" name="star" placeholder="Star name" value="">
+        </label>
+        <label>
+            <input type="submit" value="Search" >
+        </label>
+        </form>
+    </div>
+    <table>
+        <thead>
+        <tr id="table_headline">
+            <!-- A BETTER WAY???? -->
+            <th class='headline-large'>#</th>
+            <th class='headline-large'>Movie Title</th>
+            <th class='headline-large'>Rating</th>
+            <th class='headline-large'>Year</th>
+            <th class='headline-large'>Director</th>
+            <th class='headline-large'>Genres</th>
+            <th class='headline-large'>Stars</th>
+
+        </tr>
+        </thead>
+
+        <tbody id="movie_table">
+
+        </tbody>
+    </table>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+
+<!-- Necessary utility file for movie-search.js to function -->
+<script src="util-movie-list.js"></script>
+<script src="movie-search.js"></script>
+</body>
+</html>
