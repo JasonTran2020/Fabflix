@@ -35,6 +35,7 @@ public class MovieSearchServlet extends HttpServlet {
     private HttpRequestAttribute<String> starAttribute;
     private HttpRequestAttribute<String> browsingAttribute;
     private HttpRequestAttribute<String> genreNameAttribute;
+    private HttpRequestAttribute<String> charAttribute;
 
     public void init(ServletConfig config) {
         //Initialize RequestAttributes here with new objects.
@@ -45,6 +46,7 @@ public class MovieSearchServlet extends HttpServlet {
 
         browsingAttribute = new HttpRequestAttribute<>(String.class,"browsing");
         genreNameAttribute = new HttpRequestAttribute<>(String.class,"genre");
+        charAttribute = new HttpRequestAttribute<>(String.class,"char");
         try {
             dataSource = (DataSource) new InitialContext().lookup("java:comp/env/jdbc/moviedbexample");
         } catch (NamingException e) {
@@ -208,13 +210,20 @@ public class MovieSearchServlet extends HttpServlet {
 
     private PreparedStatement buildBrowsePrepareStatement(HttpServletRequest request,Connection conn) throws SQLException {
         String genre = genreNameAttribute.get(request);
+        String character = charAttribute.get(request);
         ArrayList<String> args = new ArrayList<>();
         String result = "SELECT * FROM movies AS m, ratings AS r, genres_in_movies AS gim , genres AS g  WHERE (gim.genreId = g.id) AND (gim.movieId = m.id) AND (r.movieId = m.id) ";
+
         if (genre!=null && !genre.isEmpty()){
-            result+=" AND (g.name = ?) ";
+            result += " AND (g.name = ?) ";
             args.add(genre);
         }
 
+        if (character != null && !character.isEmpty() ){
+            result += " AND (m.title LIKE ?)";
+            //Add 0 or more wild card to the end of character
+            args.add(character + "%");
+        }
         result +=" ORDER BY (r.rating) DESC;";
         request.getServletContext().log(TAG + " The complete SQL statement is \"" + result + "\"");
         request.getServletContext().log(TAG + " The number of args are \"" + args.size() + "\"");
