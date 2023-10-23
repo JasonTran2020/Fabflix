@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+  <!--The file containing pretty much all the variables. YOU NEED THIS so that the other CSS files know what values their variables are actually referencing-->
+  <link rel="stylesheet" href="general-css-files/tokens.css">
+  <link rel="stylesheet" href="general-css-files/typography.module.css">
+  <!-- The base CSS file -->
+  <link rel="stylesheet" href="base.css">
+
+  <link rel="stylesheet" href="movie-twenty-list.html.css">
+</head>
+<body>
+<h1 class="headline-large">Browsing movies</h1>
+
+<table>
+  <thead>
+  <tr id="table_headline">
+    <th class='headline-large'>#</th>
+    <th class='headline-large'>Movie Title</th>
+    <th class='headline-large'>Rating</th>
+    <th class='headline-large'>Year</th>
+    <th class='headline-large'>Director</th>
+    <th class='headline-large'>Genres</th>
+    <th class='headline-large'>Stars</th>
+
+  </tr>
+  </thead>
+
+  <tbody id="movie_table">
+
+  </tbody>
+</table>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+
+<!-- Necessary utility file for movie-search.js to function -->
+<script src="util-movie-list.js"></script>
+<script src="movie-search.js"></script>
+</body>
+</html>
