@@ -127,7 +127,10 @@ public class MovieListServlet extends HttpServlet {
         //have a many-to-many relationship. I don't think it's worth creating one giant query that has everything
         //However, that stuff was refactored to the two private functions with names that sound like what they are suppose to do. I'm losing it
         PreparedStatement genreStatement = conn.prepareStatement("SELECT g.id,g.name FROM genres AS g, genres_in_movies AS gim WHERE gim.movieid = ? AND gim.genreid = g.id ORDER BY g.name");
-        PreparedStatement starsStatement = conn.prepareStatement("SELECT s.id,s.name,s.birthYear FROM stars AS s, stars_in_movies AS sim WHERE sim.movieid = ? and sim.starid = s.id");
+        //PreparedStatement starsStatement = conn.prepareStatement("SELECT s.id,s.name,s.birthYear, sim.movieid FROM stars AS s, stars_in_movies AS sim WHERE sim.movieid = ? AND sim.starid = s.id GROUP BY (s.id) ORDER BY COUNT(sim.movieid) DESC, s.name ASC");
+        //New prepareStatement for stars to order by their movie count and then by their Alphabetical order. Works by doing a subquery to get all the star ids who are in a given movie, and then joins stars and stars in movie, selecting only the rows whose star id are in that subquery.
+        //Hence, selecting the correct stars but also being able to count the movies that the stars were in.
+        PreparedStatement starsStatement = conn.prepareStatement("SELECT  s.id,s.name,s.birthYear,COUNT(*) FROM stars as s,stars_in_movies AS sim WHERE s.id = sim.starid AND s.id IN (SELECT s.id FROM stars AS s, stars_in_movies AS sim WHERE sim.movieid = ? AND sim.starid = s.id) GROUP BY (s.id) ORDER BY COUNT(sim.movieid) DESC, s.name ASC");
         JsonArray jsonArray = new JsonArray();
         try{
             //Convert stuff from resultSet into jsonArray because we said the content type we were going to do that
