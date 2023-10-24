@@ -32,7 +32,7 @@ function handleMovieListResult(resultData, tableName){
         let stars = jsonObject["stars"];
         let genres = jsonObject["genres"]
         let starString = limitedListLinked(stars,3,"name","id","single-star.html?id=");
-        let genreString =limitedList(genres,3,"name","id","single-movie.html?id=");
+        let genreString =limitedListLinked(genres,3,"name","name","movie-browse.html?browsing=true&genre=");
 
         //Old way that used description list. Honestly not that good given the lack of a movie image, so all the content ends up being on the left with an empty center and right
         //Could center it, but doesn't make a ton of sense either given the lack of contenent and yet huge amount of vertical space taken

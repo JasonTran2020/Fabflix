@@ -20,8 +20,32 @@ function handleGenreTable(resultData, tableName){
         testBodyElement.append(entryHTML)
     }
 
-
 }
+
+function handleBrowse(elementName){
+    console.log("Building that list");
+
+    let bodyElement = jQuery(elementName);
+
+    let allCharacters = "*0123456789ABCDEFGHIJKLMNOPQRSQTUVWXYZ";
+    let count = 0;
+
+    let entryHtml = "";
+    while(count < allCharacters.length){
+        let char = allCharacters.slice(count,count+1);
+        if (count===0){
+            entryHtml += "<a href=movie-browse.html?browsing=true&char=" + char + ">" + char + "</a>";
+        }
+        else{
+            entryHtml += "<a href=movie-browse.html?browsing=true&char=" + char + ">" + ", " + char + "</a>";
+        }
+        count+=1
+    }
+    console.log("The appended html is " + entryHtml)
+    bodyElement.append(entryHtml)
+}
+
+handleBrowse("#browse")
 
 jQuery.ajax({
     dataType: "json",  // Setting return data type

@@ -126,7 +126,7 @@ public class MovieListServlet extends HttpServlet {
         // We also need to gather 3 stars and 3 genres for each movie. Unlike ratings and movies, which have a 1 to 1 relationship, genres and stars both
         //have a many-to-many relationship. I don't think it's worth creating one giant query that has everything
         //However, that stuff was refactored to the two private functions with names that sound like what they are suppose to do. I'm losing it
-        PreparedStatement genreStatement = conn.prepareStatement("SELECT g.id,g.name FROM genres AS g, genres_in_movies AS gim WHERE gim.movieid = ? AND gim.genreid = g.id");
+        PreparedStatement genreStatement = conn.prepareStatement("SELECT g.id,g.name FROM genres AS g, genres_in_movies AS gim WHERE gim.movieid = ? AND gim.genreid = g.id ORDER BY g.name");
         PreparedStatement starsStatement = conn.prepareStatement("SELECT s.id,s.name,s.birthYear FROM stars AS s, stars_in_movies AS sim WHERE sim.movieid = ? and sim.starid = s.id");
         JsonArray jsonArray = new JsonArray();
         try{

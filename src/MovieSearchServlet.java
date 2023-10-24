@@ -35,6 +35,7 @@ public class MovieSearchServlet extends HttpServlet {
     private HttpRequestAttribute<String> starAttribute;
     private HttpRequestAttribute<String> browsingAttribute;
     private HttpRequestAttribute<String> genreNameAttribute;
+    private HttpRequestAttribute<String> charAttribute;
 
     public void init(ServletConfig config) {
         //Initialize RequestAttributes here with new objects.
@@ -45,6 +46,7 @@ public class MovieSearchServlet extends HttpServlet {
 
         browsingAttribute = new HttpRequestAttribute<>(String.class,"browsing");
         genreNameAttribute = new HttpRequestAttribute<>(String.class,"genre");
+        charAttribute = new HttpRequestAttribute<>(String.class,"char");
         try {
             dataSource = (DataSource) new InitialContext().lookup("java:comp/env/jdbc/moviedbexample");
         } catch (NamingException e) {
@@ -155,7 +157,7 @@ public class MovieSearchServlet extends HttpServlet {
 //            result += " AND m.year = " + year.toString();
 //        }
         //Terminate the statement
-        result +=" ORDER BY (r.rating) DESC;";
+        result +=" ORDER BY (r.rating) DESC LIMIT 20;";
         request.getServletContext().log(TAG + " The complete SQL statement is \"" + result + "\"");
         request.getServletContext().log(TAG + " The number of args are \"" + args.size() + "\"");
         request.getServletContext().log(TAG + " Args are \"" + args.toString() + "\"");
@@ -208,14 +210,33 @@ public class MovieSearchServlet extends HttpServlet {
 
     private PreparedStatement buildBrowsePrepareStatement(HttpServletRequest request,Connection conn) throws SQLException {
         String genre = genreNameAttribute.get(request);
+        String character = charAttribute.get(request);
         ArrayList<String> args = new ArrayList<>();
-        String result = "SELECT * FROM movies AS m, ratings AS r, genres_in_movies AS gim , genres AS g  WHERE (gim.genreId = g.id) AND (gim.movieId = m.id) AND (r.movieId = m.id) ";
+        //Selecting individual columns and using DISTINCT as a movie can have several genres, causing duplicate data, unlike ratings which has a 1 to 1 relationship with movies
+        String result = "SELECT DISTINCT m.id,m.title,m.year,m.director,r.rating,r.numVotes FROM movies AS m, ratings AS r, genres_in_movies AS gim , genres AS g  WHERE (gim.genreId = g.id) AND (gim.movieId = m.id) AND (r.movieId = m.id) ";
+
         if (genre!=null && !genre.isEmpty()){
-            result+=" AND (g.name = ?) ";
+            result += " AND (g.name = ?) ";
             args.add(genre);
         }
 
-        result +=" ORDER BY (r.rating) DESC;";
+        if (character != null && !character.isEmpty() ){
+            //Special case wildcard characters, as we looking for titles that DON'T start with ANY alpha-numeric characters
+            //No insertion to args here
+            if (character.equals("*")){
+                //Honestly not that good with regex, but learned something from this
+                //There are two main things the caret symbol (^) does – it matches the start of a line or the start of a string, and it negates a character set when you put it inside the square brackets
+                //Therefore, this is REGEXP is basically saying "Select the movies where the title STARTS with characers from this set, and the set is saying NOT a-z and 0-9. MySql by default doesn't seem to care for capital letters
+                result += " AND (m.title REGEXP \"^[^a-z0-9]+\" )";
+            }
+            else{
+                result += " AND (m.title LIKE ?)";
+                //Add 0 or more wild card to the end of character
+                args.add(character + "%");
+            }
+
+        }
+        result += " ORDER BY (r.rating) DESC LIMIT 20;";
         request.getServletContext().log(TAG + " The complete SQL statement is \"" + result + "\"");
         request.getServletContext().log(TAG + " The number of args are \"" + args.size() + "\"");
         request.getServletContext().log(TAG + " Args are \"" + args.toString() + "\"");
