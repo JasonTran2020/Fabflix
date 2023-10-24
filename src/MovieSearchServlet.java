@@ -157,7 +157,7 @@ public class MovieSearchServlet extends HttpServlet {
 //            result += " AND m.year = " + year.toString();
 //        }
         //Terminate the statement
-        result +=" ORDER BY (r.rating) DESC;";
+        result +=" ORDER BY (r.rating) DESC LIMIT 20;";
         request.getServletContext().log(TAG + " The complete SQL statement is \"" + result + "\"");
         request.getServletContext().log(TAG + " The number of args are \"" + args.size() + "\"");
         request.getServletContext().log(TAG + " Args are \"" + args.toString() + "\"");
@@ -236,7 +236,7 @@ public class MovieSearchServlet extends HttpServlet {
             }
 
         }
-        result += " ORDER BY (r.rating) DESC;";
+        result += " ORDER BY (r.rating) DESC LIMIT 20;";
         request.getServletContext().log(TAG + " The complete SQL statement is \"" + result + "\"");
         request.getServletContext().log(TAG + " The number of args are \"" + args.size() + "\"");
         request.getServletContext().log(TAG + " Args are \"" + args.toString() + "\"");
