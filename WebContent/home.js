@@ -27,7 +27,7 @@ function handleBrowse(elementName){
 
     let bodyElement = jQuery(elementName);
 
-    let allCharacters = "0123456789ABCDEFGHIJKLMNOPQRSQTUVWXYZ";
+    let allCharacters = "*0123456789ABCDEFGHIJKLMNOPQRSQTUVWXYZ";
     let count = 0;
 
     let entryHtml = "";
