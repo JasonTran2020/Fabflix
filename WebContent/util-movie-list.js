@@ -189,7 +189,7 @@ function limitedListLinked(theList,limit,propertyName,idName,endPoint){
         }
         //Last item before we hit max but we still had more items in the list
         else if (x===(max-1) && max!==theList.length){
-            result+= linkedName + "...";
+            result+= ", " + linkedName + "...";
         }
         // Items in the middle of the list
         else{
