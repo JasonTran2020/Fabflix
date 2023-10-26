@@ -1,5 +1,6 @@
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import datamodels.HttpRequestAttribute;
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -14,12 +15,15 @@ import javax.xml.transform.Result;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 @WebServlet(name = "MovieListServlet",urlPatterns = "/api/top-20-movie-list")
 public class MovieListServlet extends HttpServlet {
     //Lastest serialVersionUID was 2L, so bumping this up to 3L. L is for Long
     private static final long serialVersionUID = 3L;
-
+    public static final String TAG = "MovieListServlet";
     // Create a dataSource which registered in web.xml
     private DataSource dataSource;
 
@@ -48,11 +52,9 @@ public class MovieListServlet extends HttpServlet {
 
             //Get top 20 movies by joining the movies and ratings table by movieId from ratings and id from movies.
             //And then order by descending and limiting by 20
-            String query = "SELECT * FROM movies AS m, ratings AS r WHERE (r.movieId = m.id) ORDER BY (r.rating) DESC LIMIT 20";
-
+            String query = "SELECT * FROM movies AS m, ratings AS r WHERE (r.movieId = m.id) " + buildOrderByClause(req,"m","r") + " " + buildPaginationClause(req);
+            req.getServletContext().log(TAG + " the final query is: " + query);
             ResultSet resultSet = statement.executeQuery(query);
-
-
 
             JsonArray jsonArray = buildMovieJsonArray(resultSet,conn);
 
@@ -117,6 +119,43 @@ public class MovieListServlet extends HttpServlet {
         jsonMovieObject.add("stars",movieStars);
 
     }
+
+    public static String buildOrderByClause(HttpServletRequest request, String movieTbName, String ratingTbName){
+
+        HttpRequestAttribute<String> ascOrDescAttribute = new HttpRequestAttribute<>(String.class,"direction");
+        HttpRequestAttribute<String> orderByAttribute = new HttpRequestAttribute<>(String.class,"orderby");
+
+        request.getServletContext().log(TAG + "ascOrDesc is: "+ascOrDescAttribute.get(request));
+        request.getServletContext().log(TAG + "orderBy is: "+orderByAttribute.get(request));
+        String direction = (ascOrDescAttribute.get(request)==null || ascOrDescAttribute.get(request).equals("desc")) ? "DESC" : "ASC";
+
+        String orderBy = (orderByAttribute.get(request)==null || orderByAttribute.get(request).equals("rating")) ? ratingTbName + ".rating" : movieTbName + ".title";
+        //Fine to build SQL query as string since user cannot customize input. Two different outputs depending on which one was selected to be the primary sorter
+        // (ties are broken by sorting a different column)
+        if (orderBy.equals(ratingTbName + ".rating")){
+            return " ORDER BY " + orderBy + " " + direction +" , " + movieTbName + ".title " + direction ;
+        }
+        return " ORDER BY " + orderBy + " " + direction +" , " + ratingTbName + ".rating " + direction ;
+
+    }
+
+    public static String buildPaginationClause(HttpServletRequest request){
+        HttpRequestAttribute<String> perPageAttribute = new HttpRequestAttribute<>(String.class,"pp");
+        request.getServletContext().log(TAG + "perpage is: " + perPageAttribute.get(request));
+        List permittedPerPage = Arrays.asList(10, 25, 50, 100);
+        try{
+            int perPageInt = Integer.parseInt(perPageAttribute.get(request));
+            if (permittedPerPage.contains(perPageInt)){
+                return " LIMIT " + perPageInt;
+            }
+            return " LIMIT 25 ";
+
+        }
+        catch (NumberFormatException e){
+            return " LIMIT 25 ";
+        }
+    }
+
 
     public static JsonArray buildMovieJsonArray(ResultSet movies, Connection conn) throws SQLException {
         //This method was created to deal with the conversion of SQL data to JsonArray AND because the MovieSearchServlet does a similar thing, so to avoid

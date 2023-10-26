@@ -29,8 +29,12 @@ function submitSearchForm(){
 }
 
 let url = window.location.href;
-let parameters = url.slice(url.indexOf("?"))
-
+let index = url.indexOf("?")
+let parameters=""
+//Needed due to potential bug where there is no ? and we slice at -1
+if (index!=-1){
+    parameters = url.slice(index)
+}
 // Makes the HTTP GET request and registers on success callback function handleMovieListResult
 jQuery.ajax({
     dataType: "json", // Setting return data type

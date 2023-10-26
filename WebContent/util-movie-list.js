@@ -23,7 +23,7 @@ function handleMovieListResult(resultData, tableName){
     //Empty out the element of its children. Could be useful for the SearchServlet depending on implementation
     testBodyElement.empty()
 
-    for (let i = 0; i < Math.min(resultData.length,20); i++){
+    for (let i = 0; i < resultData.length; i++){
 
         let jsonObject=resultData[i];
         let entryHTML = "";
@@ -61,6 +61,13 @@ function handleMovieListResult(resultData, tableName){
     }
 }
 
+function buildSortingAndPaginationForm(formName){
+    let inputFormElement = jQuery(form);
+    inputFormElement.empty();
+
+
+
+}
 
 function limitedList(theList,limit,propertyName){
     let result ="";

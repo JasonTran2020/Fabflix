@@ -1,5 +1,6 @@
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import datamodels.HttpRequestAttribute;
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -157,7 +158,7 @@ public class MovieSearchServlet extends HttpServlet {
 //            result += " AND m.year = " + year.toString();
 //        }
         //Terminate the statement
-        result +=" ORDER BY (r.rating) DESC LIMIT 20;";
+        result += MovieListServlet.buildOrderByClause(request,"m","r" ) + " " + MovieListServlet.buildPaginationClause(request);
         request.getServletContext().log(TAG + " The complete SQL statement is \"" + result + "\"");
         request.getServletContext().log(TAG + " The number of args are \"" + args.size() + "\"");
         request.getServletContext().log(TAG + " Args are \"" + args.toString() + "\"");
@@ -249,19 +250,7 @@ public class MovieSearchServlet extends HttpServlet {
 
     }
 
-    class HttpRequestAttribute<T>{
-        private final Class<T> type;
-        private final String name;
-        HttpRequestAttribute(Class<T> type, String name) {
-            this.type = type;
-            this.name = name;
-        }
 
-        T get(HttpServletRequest request){
-            //PARAMETER, not attribute. Apparently attribute it server side stuff, and parameter is the stuff you see at the end or a URL
-            return type.cast(request.getParameter(name));
-        }
-    }
 
 
 }
