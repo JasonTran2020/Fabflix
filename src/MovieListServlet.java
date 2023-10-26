@@ -141,18 +141,33 @@ public class MovieListServlet extends HttpServlet {
 
     public static String buildPaginationClause(HttpServletRequest request){
         HttpRequestAttribute<String> perPageAttribute = new HttpRequestAttribute<>(String.class,"pp");
+        HttpRequestAttribute<String> pageAttribute = new HttpRequestAttribute<>(String.class,"p");
         request.getServletContext().log(TAG + "perpage is: " + perPageAttribute.get(request));
+        request.getServletContext().log(TAG + " page is: " + pageAttribute.get(request));
         List permittedPerPage = Arrays.asList(10, 25, 50, 100);
         try{
-            int perPageInt = Integer.parseInt(perPageAttribute.get(request));
-            if (permittedPerPage.contains(perPageInt)){
-                return " LIMIT " + perPageInt;
+            int perPageInt = handleParseInt(perPageAttribute.get(request),25);
+            int pageInt = handleParseInt(pageAttribute.get(request),1);
+            if (pageInt<=0){
+                pageInt = 1;
             }
-            return " LIMIT 25 ";
+            if (permittedPerPage.contains(perPageInt)){
+                return " LIMIT " + perPageInt +" OFFSET " + (perPageInt*(pageInt-1));
+            }
+            return " LIMIT 25 " + " OFFSET " + (25*(pageInt-1));
 
         }
         catch (NumberFormatException e){
             return " LIMIT 25 ";
+        }
+    }
+
+    private static int handleParseInt(String input, int defaultValue){
+        try{
+            return Integer.parseInt(input);
+        }
+        catch (Exception e){
+            return defaultValue;
         }
     }
 

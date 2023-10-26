@@ -22,6 +22,8 @@ function handleMovieListResult(resultData, tableName){
     let testBodyElement = jQuery(tableName);
     //Empty out the element of its children. Could be useful for the SearchServlet depending on implementation
     testBodyElement.empty()
+    let page = parseInt(paramFromCurrent("p","1"));
+    let perPage = parseInt(paramFromCurrent("pp","25"));
 
     for (let i = 0; i < resultData.length; i++){
 
@@ -44,7 +46,8 @@ function handleMovieListResult(resultData, tableName){
         // entryHTML += "<dd class='headline-small'>" + "<strong>" + 'Genres: '  + "</strong>" + genreString + "<dd/>";
         // entryHTML += '</div>'
         entryHTML += "<tr>";
-        entryHTML += "<td class='headline-medium'>" + "#" + (i+1) + "</td>";
+        //Bit of a bunch of math for the movie position, but basically having to count based on what page we are plus how many movies are on each page, and then minus 1 because page 1 shouldn't count, and of course +1 because a movie at position 0 doesn't make much sense to a user
+        entryHTML += "<td class='headline-medium'>" + "#" + ((perPage*(page-1))+i+1) + "</td>";
         entryHTML += "<td class='headline-medium'>" + "<a class=" + '"movie-title" ' + "href=single-movie.html?id=" + jsonObject["movie_id"] + ">" + jsonObject["title"]  + "</a>" + "</td>";
         entryHTML += "<td class='headline-medium'>" + "&#9733 "+jsonObject["rating"] + "</td>";
         entryHTML += "<td class='headline-medium'>" + jsonObject["year"] + "</td>";
@@ -62,11 +65,75 @@ function handleMovieListResult(resultData, tableName){
 }
 
 function buildSortingAndPaginationForm(formName){
-    let inputFormElement = jQuery(form);
-    inputFormElement.empty();
+    //Should probably combine this with buildPaginationLinks
+    let inputFormElement = jQuery(formName);
+
+    let entryHtml = "    <select name=\"pp\">\n" +
+        "        <option value=\"10\">10</option>\n" +
+        "        <option value=\"25\" selected=\"selected\">25</option>\n" +
+        "        <option value=\"50\">50</option>\n" +
+        "        <option value=\"100\">100</option>\n" +
+        "    </select>\n" +
+        "     results per page, sort by\n" +
+        "    <select name=\"orderby\">\n" +
+        "        <option value=\"rating\" selected=\"selected\">rating</option>\n" +
+        "        <option value=\"title\">title</option>\n" +
+        "    </select>\n" +
+        "     in the\n" +
+        "    <select name=\"direction\" >\n" +
+        "        <option value=\"asc\">asc</option>\n" +
+        "        <option value=\"desc\" selected=\"selected\">desc</option>\n" +
+        "    </select>\n" +
+        "     order.\n" +
+        "    <input name='p' hidden='hidden' value='1'>"
 
 
+    inputFormElement.append(entryHtml)
 
+
+}
+
+function buildPaginationLinks(containerName,parameterName){
+    let currentPage= 1;
+    let originalLink = window.location.href;
+    let backLink = "";
+    let nextLink = "";
+    if (originalLink.includes("?")){
+        let params = new URLSearchParams(window.location.search);
+        if (params.get(parameterName)!=null){
+            currentPage = parseInt(params.get(parameterName));
+        }
+        params.set(parameterName,currentPage-1);
+        backLink = originalLink.slice(0,originalLink.indexOf("?"))+"?"+params.toString();
+        params.set(parameterName,currentPage+1);
+        nextLink = originalLink.slice(0,originalLink.indexOf("?")) +"?"+params.toString();
+    }
+    else{
+        backLink += "?"+parameterName+"="+(currentPage-1);
+        nextLink += "?"+parameterName+"="+(currentPage+1);
+    }
+    let containerElement = jQuery(containerName);
+    let entryHtml = "";
+
+    if (currentPage <= 1){
+        entryHtml += "<span> &ltPrev </span>";
+    }
+    else{
+        entryHtml += "<a href=" + backLink +">" + "&ltPrev " + "</a>";
+    }
+
+    entryHtml += "<a href=" + nextLink + ">" + " Next&gt" + "</a>";
+
+    containerElement.append(entryHtml)
+
+}
+
+function paramFromCurrent(paramName,defaultValue){
+    let params = new URLSearchParams(window.location.search);
+    if (params.get(paramName)!=null){
+        return params.get(paramName);
+    }
+    return defaultValue;
 }
 
 function limitedList(theList,limit,propertyName){

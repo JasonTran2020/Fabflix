@@ -7,6 +7,8 @@ if (index!=-1){
     parameters = url.slice(index)
 }
 
+buildSortingAndPaginationForm("#sorting-form");
+buildPaginationLinks("#paginator", "p")
 
 jQuery.ajax({
     dataType: "json", // Setting return data type

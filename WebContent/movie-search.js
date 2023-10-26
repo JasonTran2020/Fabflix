@@ -35,6 +35,9 @@ let parameters=""
 if (index!=-1){
     parameters = url.slice(index)
 }
+
+buildSortingAndPaginationForm("#sorting-form");
+buildPaginationLinks("#paginator","p")
 // Makes the HTTP GET request and registers on success callback function handleMovieListResult
 jQuery.ajax({
     dataType: "json", // Setting return data type

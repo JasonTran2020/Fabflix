@@ -16,25 +16,13 @@
 
 <h1 class="headline-large">Top 20 movies!</h1>
 <form id="sorting-form" action="movie-twenty-list.html">
-    <select name="pp">
-        <option value="10">10</option>
-        <option value="25" selected="selected">25</option>
-        <option value="50">50</option>
-        <option value="100">100</option>
-    </select>
-     results per page, sort by
-    <select name="orderby">
-        <option value="rating" selected="selected">rating</option>
-        <option value="title">title</option>
-    </select>
-     in the
-    <select name="direction" >
-        <option value="asc">asc</option>
-        <option value="desc" selected="selected">desc</option>
-    </select>
-     order.
+<!-- Script to build the rest of this form-->
     <input type="submit">
+
 </form>
+<div id="paginator">
+
+</div>
 <table>
     <thead>
     <tr id="table_headline">
