@@ -51,15 +51,21 @@ public class SingleMovieServlet extends HttpServlet {
         try (Connection conn = dataSource.getConnection()) {
             // Get a connection from dataSource
 
+            //We don't need to join the movies table and the star tables. Duplicate data
             // Construct a query with parameter represented by "?"
-            String query = "SELECT * from stars as s, stars_in_movies as sim, movies as m, ratings as r " +
-                    "where m.id = sim.movieId and sim.starId = s.id and r.movieId = m.id and m.id = ?";
+//            String query = "SELECT * from stars as s, stars_in_movies as sim, movies as m, ratings as r " +
+//                    "where m.id = sim.movieId and sim.starId = s.id and r.movieId = m.id and m.id = ?";
+
+            String query = "SELECT * FROM movies AS m, ratings AS r WHERE r.movieId = m.id and m.id = ?";
 
             // Declare our statement
             PreparedStatement statement = conn.prepareStatement(query);
-
-            PreparedStatement genreStatement = conn.prepareStatement("SELECT g.id,g.name FROM genres AS g, genres_in_movies AS gim WHERE gim.movieid = ? AND gim.genreid = g.id");
-            PreparedStatement starsStatement = conn.prepareStatement("SELECT s.id,s.name,s.birthYear FROM stars AS s, stars_in_movies AS sim WHERE sim.movieid = ? and sim.starid = s.id");
+            //Sorting by name in accordance to proj 2
+            PreparedStatement genreStatement = conn.prepareStatement("SELECT g.id,g.name FROM genres AS g, genres_in_movies AS gim WHERE gim.movieid = ? AND gim.genreid = g.id ORDER BY g.name");
+            //New prepareStatement for stars to order by their movie count and then by their Alphabetical order. Works by doing a subquery to get all the star ids who are in a given movie, and then joins stars and stars in movie, selecting only the rows whose star id are in that subquery.
+            //Hence, selecting the correct stars but also being able to count the movies that the stars were in.
+            PreparedStatement starsStatement = conn.prepareStatement("SELECT  s.id,s.name,s.birthYear,COUNT(*) FROM stars as s,stars_in_movies AS sim " +
+                    "WHERE s.id = sim.starid AND s.id IN (SELECT s.id FROM stars AS s, stars_in_movies AS sim WHERE sim.movieid = ? AND sim.starid = s.id) GROUP BY (s.id) ORDER BY COUNT(sim.movieid) DESC, s.name ASC");
 
             // Set the parameter represented by "?" in the query to the id we get from url,
             // num 1 indicates the first "?" in the query
@@ -71,45 +77,50 @@ public class SingleMovieServlet extends HttpServlet {
             JsonArray jsonArray = new JsonArray();
 
             // Iterate through each row of result set
-            while (resultSet.next()) {
+            //while (resultSet.next()) {
+            resultSet.next();
 
-                //Add arguments to the statement before executing
-                String starId = resultSet.getString("starId");
-                String starName = resultSet.getString("name");
-                String movieId = resultSet.getString("movieId");
-                String movieTitle = resultSet.getString("title");
-                String movieYear = resultSet.getString("year");
-                String movieDirector = resultSet.getString("director");
-                String rating = resultSet.getString("rating");
+            //Add arguments to the statement before executing
+//                String starId = resultSet.getString("starId");
+//                String starName = resultSet.getString("name");
+            String movieId = resultSet.getString("movieId");
+            String movieTitle = resultSet.getString("title");
+            String movieYear = resultSet.getString("year");
+            String movieDirector = resultSet.getString("director");
+            String rating = resultSet.getString("rating");
 
-                genreStatement.setString(1, movieId);
-                starsStatement.setString(1,movieId);
+            genreStatement.setString(1, movieId);
+            starsStatement.setString(1,movieId);
 
-                ResultSet genreResultSet = genreStatement.executeQuery();
-                ResultSet starsResultSet = starsStatement.executeQuery();
+            ResultSet genreResultSet = genreStatement.executeQuery();
+            ResultSet starsResultSet = starsStatement.executeQuery();
 
-                // Create a JsonObject based on the data we retrieve from rs
+            // Create a JsonObject based on the data we retrieve from rs
 
-                JsonObject jsonObject = new JsonObject();
-                jsonObject.addProperty("star_id", starId);
-                jsonObject.addProperty("star_name", starName);
-                jsonObject.addProperty("movie_id", movieId);
-                jsonObject.addProperty("movie_title", movieTitle);
-                jsonObject.addProperty("movie_year", movieYear);
-                jsonObject.addProperty("movie_director", movieDirector);
-                jsonObject.addProperty("rating", rating);
-                //Adding the genres was relegated to a separate function
-                this.addGenres(movieId,jsonObject,genreResultSet);
+            JsonObject jsonObject = new JsonObject();
+//                jsonObject.addProperty("star_id", starId);
+//                jsonObject.addProperty("star_name", starName);
+            jsonObject.addProperty("movie_id", movieId);
+            jsonObject.addProperty("movie_title", movieTitle);
+            jsonObject.addProperty("movie_year", movieYear);
+            jsonObject.addProperty("movie_director", movieDirector);
+            jsonObject.addProperty("rating", rating);
+            //Adding the genres was relegated to a separate function
+            MovieListServlet.addGenres(movieId,jsonObject,genreResultSet);
 
-                //Same goes for the stars
-                this.addStars(movieId,jsonObject,starsResultSet);
+            //Same goes for the stars
+            MovieListServlet.addStars(movieId,jsonObject,starsResultSet);
 
-                jsonArray.add(jsonObject);
+            jsonArray.add(jsonObject);
 
 
-                genreResultSet.close();
-                starsResultSet.close();
-            }
+            genreResultSet.close();
+            starsResultSet.close();
+            //}
+            //Need to close preparedStatements as well
+            genreStatement.close();
+            starsStatement.close();
+
             resultSet.close();
             statement.close();
 
@@ -138,40 +149,7 @@ public class SingleMovieServlet extends HttpServlet {
         // Always remember to close db connection after usage. Here it's done by try-with-resources
 
     }
-    private void addGenres(String movie_id,JsonObject jsonMovieObject, ResultSet genreResultSet) throws java.sql.SQLException{
-        //Add all the associated movieGenres as a JsonArray, since there are a variable amount of them per list
-        JsonArray movieGenres = new JsonArray();
-        while (genreResultSet.next()){
-            JsonObject jsonGenreObject = new JsonObject();
-            jsonGenreObject.addProperty("id",genreResultSet.getInt("id"));
-            jsonGenreObject.addProperty("name",genreResultSet.getString("name"));
 
-
-            //Add the genre object to the Json array
-            movieGenres.add(jsonGenreObject);
-        }
-        //Finally genres Jsonarray itself
-        jsonMovieObject.add("genres",movieGenres);
-
-    }
-
-    private void addStars(String movie_id,JsonObject jsonMovieObject, ResultSet starsResultSet) throws java.sql.SQLException{
-        //Time to add the stars associated with the movie, also as a JsonArray
-        JsonArray movieStars= new JsonArray();
-        while (starsResultSet.next()){
-            JsonObject jsonStarObject = new JsonObject();
-            jsonStarObject.addProperty("id",starsResultSet.getString("id"));
-            jsonStarObject.addProperty("name",starsResultSet.getString("name"));
-            //Yes, the resultset has birthyear as 1 word with no underscore
-            jsonStarObject.addProperty("birth_year",starsResultSet.getInt("birthyear"));
-
-            //Add the star json object to the movieStars JsonArray
-            movieStars.add(jsonStarObject);
-        }
-        //Now we get to add the stars as a Json array
-        jsonMovieObject.add("stars",movieStars);
-
-    }
 }
 
 

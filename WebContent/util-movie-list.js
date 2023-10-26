@@ -168,20 +168,32 @@ function limitedList(theList,limit,propertyName){
 function limitedListLinked(theList,limit,propertyName,idName,endPoint){
 
     let result ="";
-    for (let x = 0; x <Math.min(limit, theList.length);x++){
+    let max = theList.length;
+    //So use -1 as the limit if you don't want a limit
+    if (limit!==-1){
+        max = Math.min(limit, theList.length);
+    }
+    for (let x = 0; x <max;x++){
 
         let name = theList[x][propertyName];
         let id = theList[x][idName];
         //Condition to put and at the end
         let linkedName= "<a href=" + endPoint + id + ">" + name + "<a/>";
-        if (x===limit-1 && theList.length===limit){
-            result+="and "+linkedName;
+        //First item in the list
+        if (x === 0){
+            result += linkedName + " ";
         }
-        else if (x===2){
+        //Last item in the list itself
+        else if (x===max-1 && theList.length===max){
+            result+=", and "+linkedName;
+        }
+        //Last item before we hit max but we still had more items in the list
+        else if (x===(max-1) && max!==theList.length){
             result+= linkedName + "...";
         }
+        // Items in the middle of the list
         else{
-            result+= linkedName +", ";
+            result+= ", " + linkedName;
         }
     }
     return result
