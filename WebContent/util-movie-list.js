@@ -76,14 +76,15 @@ function buildSortingAndPaginationForm(formName){
         "    </select>\n" +
         "     results per page, sort by\n" +
         "    <select name=\"orderby\">\n" +
-        "        <option value=\"rating\" selected=\"selected\">rating</option>\n" +
-        "        <option value=\"title\">title</option>\n" +
-        "    </select>\n" +
-        "     in the\n" +
-        "    <select name=\"direction\" >\n" +
-        "        <option value=\"asc\">asc</option>\n" +
-        "        <option value=\"desc\" selected=\"selected\">desc</option>\n" +
-        "    </select>\n" +
+        "        <option value=\"rata\" selected=\"selected\">rating asc, title asc</option>\n" +
+        "        <option value=\"ratd\">rating asc, title desc</option>\n" +
+        "        <option value=\"rdta\">rating desc, title asc</option>\n" +
+        "        <option value=\"rdtd\">rating desc, title desc</option>\n" +
+        "        <option value=\"tara\">title asc, rating asc</option>\n" +
+        "        <option value=\"tard\">title asc, rating desc</option>\n" +
+        "        <option value=\"tdra\">title desc, rating asc</option>\n" +
+        "        <option value=\"tdrd\">title desc, rating desc</option>\n" +
+
         "     order.\n" +
         "    <input name='p' hidden='hidden' value='1'>"
 

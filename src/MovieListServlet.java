@@ -15,9 +15,7 @@ import javax.xml.transform.Result;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 @WebServlet(name = "MovieListServlet",urlPatterns = "/api/top-20-movie-list")
 public class MovieListServlet extends HttpServlet {
@@ -121,23 +119,28 @@ public class MovieListServlet extends HttpServlet {
     }
 
     public static String buildOrderByClause(HttpServletRequest request, String movieTbName, String ratingTbName){
-
-        HttpRequestAttribute<String> ascOrDescAttribute = new HttpRequestAttribute<>(String.class,"direction");
         HttpRequestAttribute<String> orderByAttribute = new HttpRequestAttribute<>(String.class,"orderby");
-
-        request.getServletContext().log(TAG + "ascOrDesc is: "+ascOrDescAttribute.get(request));
         request.getServletContext().log(TAG + "orderBy is: "+orderByAttribute.get(request));
-        String direction = (ascOrDescAttribute.get(request)==null || ascOrDescAttribute.get(request).equals("desc")) ? "DESC" : "ASC";
 
-        String orderBy = (orderByAttribute.get(request)==null || orderByAttribute.get(request).equals("rating")) ? ratingTbName + ".rating" : movieTbName + ".title";
-        //Fine to build SQL query as string since user cannot customize input. Two different outputs depending on which one was selected to be the primary sorter
-        // (ties are broken by sorting a different column)
-        if (orderBy.equals(ratingTbName + ".rating")){
-            return " ORDER BY " + orderBy + " " + direction +" , " + movieTbName + ".title " + direction ;
-        }
-        return " ORDER BY " + orderBy + " " + direction +" , " + ratingTbName + ".rating " + direction ;
+        String orderBy = (orderByAttribute.get(request)!=null ) ? orderByAttribute.get(request) : "";
+        return parseOrderByParameter(orderBy,movieTbName,ratingTbName);
 
     }
+    private static String parseOrderByParameter(String input,String movieTbName, String ratingTbName ){
+        // Functions assumes that the string
+        if (input.length()!=4){
+            return " ORDER BY " + ratingTbName +".rating DESC, " + movieTbName +".title ASC";
+        }
+        HashMap<String,String> orderByDict = new HashMap<>();
+        orderByDict.put("t",movieTbName+".title");
+        orderByDict.put("r",ratingTbName+".rating");
+        orderByDict.put("a","ASC");
+        orderByDict.put("d","DESC");
+        return " ORDER BY " + orderByDict.getOrDefault(input.substring(0,1),ratingTbName+".rating ") + " "+ orderByDict.getOrDefault(input.substring(1,2),"DESC") +
+                ", " + orderByDict.getOrDefault(input.substring(2,3),movieTbName+".title ") + " " + orderByDict.getOrDefault(input.substring(3,4),"ASC");
+
+    }
+
 
     public static String buildPaginationClause(HttpServletRequest request){
         HttpRequestAttribute<String> perPageAttribute = new HttpRequestAttribute<>(String.class,"pp");
@@ -184,7 +187,8 @@ public class MovieListServlet extends HttpServlet {
         //PreparedStatement starsStatement = conn.prepareStatement("SELECT s.id,s.name,s.birthYear, sim.movieid FROM stars AS s, stars_in_movies AS sim WHERE sim.movieid = ? AND sim.starid = s.id GROUP BY (s.id) ORDER BY COUNT(sim.movieid) DESC, s.name ASC");
         //New prepareStatement for stars to order by their movie count and then by their Alphabetical order. Works by doing a subquery to get all the star ids who are in a given movie, and then joins stars and stars in movie, selecting only the rows whose star id are in that subquery.
         //Hence, selecting the correct stars but also being able to count the movies that the stars were in.
-        PreparedStatement starsStatement = conn.prepareStatement("SELECT  s.id,s.name,s.birthYear,COUNT(*) FROM stars as s,stars_in_movies AS sim WHERE s.id = sim.starid AND s.id IN (SELECT s.id FROM stars AS s, stars_in_movies AS sim WHERE sim.movieid = ? AND sim.starid = s.id) GROUP BY (s.id) ORDER BY COUNT(sim.movieid) DESC, s.name ASC");
+        PreparedStatement starsStatement = conn.prepareStatement("SELECT  s.id,s.name,s.birthYear,COUNT(*) FROM stars as s,stars_in_movies AS sim WHERE s.id = sim.starid AND s.id IN (SELECT s.id " +
+                "FROM stars AS s, stars_in_movies AS sim WHERE sim.movieid = ? AND sim.starid = s.id) GROUP BY (s.id) ORDER BY COUNT(sim.movieid) DESC, s.name ASC");
         JsonArray jsonArray = new JsonArray();
         try{
             //Convert stuff from resultSet into jsonArray because we said the content type we were going to do that
