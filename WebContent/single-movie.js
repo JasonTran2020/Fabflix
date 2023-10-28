@@ -1,4 +1,17 @@
 
+function addToCart(event, movie_id) {
+    console.log("adding one movie to cart");
+
+    jQuery.ajax({
+        dataType: "json",
+        method: "POST",
+        url: "api/index?movieid=" + movie_id + "&action=add",
+        success: function() {
+            alert("Movie added to cart successfully!");
+        }
+    });
+
+}
 function handleMovieResult(resultData){
     console.log("handleResult: populating movie info from resultData");
     let movieName = jQuery("#movie_name");
@@ -23,7 +36,7 @@ function handleMovieResult(resultData){
     entryHTML += "<th class='headline-large'>" + resultData[0]["movie_year"] + "</th>";
     entryHTML += "<th class='headline-large'>" + genreString + "</th>";
     entryHTML += "<th class='headline-large'>" + starString + "</th>";
-    entryHTML += "<th><button type='button' class='btn btn-outline-primary' id = '" + resultData[0]["movie_id"] + "' name='" + resultData[0]["movie_title"] +"'>Add</button>" + "</th>";
+    entryHTML += "<th><button type='button' class='btn btn-outline-primary' id='" + resultData[0]["movie_id"] + "'>Add</button></th>";
     entryHTML += "<div/>";
     entryHTML += "</tr>";
     //         rowHTML += "<th class='headline-large'>" + '<a href="single-movie.html?id=' + resultData[0]["movies"][i]["movie_id"] + '">' + resultData[0]["movies"][i]["movie_title"] + "</a>" + "</th>";
@@ -34,7 +47,9 @@ function handleMovieResult(resultData){
 
     testBodyElement.append(entryHTML);
 
-
+    $(document).on("click", '.btn', function(event) {
+        addToCart(event, this.id);
+    });
 }
 
 function getList(theList, propertyName, flag){
