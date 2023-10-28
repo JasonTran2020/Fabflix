@@ -16,3 +16,22 @@ body {
     height: 100vh;
     background-image: url('https://codetheweb.blog/assets/img/posts/css-advanced-background-images/mountains.jpg');
 }
+
+#add_to_cart_button {
+    background-color: #ec4343;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+#add_to_cart_button:hover {
+    background-color: #ec4343;
+}
+
+.center-button {
+    text-align: center;
+    margin-top: 20px;  /* Optional: adds some space above the button */
+}
