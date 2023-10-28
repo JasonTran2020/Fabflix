@@ -54,7 +54,7 @@ function handleMovieListResult(resultData, tableName){
         entryHTML += "<td class='headline-medium'>" + jsonObject["director"] + "</td>";
         entryHTML += "<td class='headline-medium'>" + genreString + "</td>";
         entryHTML += "<td class='headline-medium'>" + starString + "</td>";
-
+        entryHTML += "<th><button type='button' class='btn btn-outline-primary' id = '" + resultData[0]["movie_id"] + "' name='" + resultData[0]["movie_title"] +"'>Add</button>" + "</th>";
         entryHTML += "</tr>";
 
 
