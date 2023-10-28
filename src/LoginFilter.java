@@ -50,6 +50,9 @@ public class LoginFilter implements Filter {
         allowedURIs.add("login.html");
         allowedURIs.add("login.js");
         allowedURIs.add("api/login");
+        allowedURIs.add("general-css-files/tokens.css");
+        allowedURIs.add("base.css");
+        allowedURIs.add("general-css-files/typography.module.css");
     }
 
     public void destroy() {

@@ -58,9 +58,14 @@ public class LoginServlet extends HttpServlet {
             if (resultSet.next()) {
                 String dbEmail = resultSet.getString("email");
                 String dbPassword = resultSet.getString("password");
+                int dbId = resultSet.getInt("id");
+                String dbFirstName = resultSet.getString("firstName");
+                String dbLastName = resultSet.getString("lastName");
+                String dbCcId = resultSet.getString("ccId");
+                String dbAddress = resultSet.getString("address");
                 // Assuming passwords are stored as plaintext for this example, but hashing should be used.
                 if (username.equals(dbEmail) && password.equals(dbPassword)) {
-                    request.getSession().setAttribute("user", new User(username));
+                    request.getSession().setAttribute("user", new User(dbEmail, dbId, dbFirstName, dbLastName, dbCcId, dbAddress));
                     responseJsonObject.addProperty("status", "success");
                     responseJsonObject.addProperty("message", "success");
 
