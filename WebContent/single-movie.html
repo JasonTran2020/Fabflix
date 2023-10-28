@@ -1,35 +1,66 @@
-<!DOCTYPE html>
+<!-- This example is following frontend and backend separation.
+
+    This .html performs two steps:
+    1. Create a html template skeleton, with all the elements defined (some left empty) and named with ids.
+    2. Load single-star.js to populate the data into empty elements.
+    -->
+
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Single Movie Page</title>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <!--The file containing pretty much all the variables. YOU NEED THIS so that the other CSS files know what values their variables are actually referencing-->
     <link rel="stylesheet" href="general-css-files/tokens.css">
     <link rel="stylesheet" href="general-css-files/typography.module.css">
     <!-- The base CSS file -->
     <link rel="stylesheet" href="base.css">
     <!-- If this file need something different, then it will be override by the single-star.css, as it is declared after the base.css file -->
-    <link rel="stylesheet" href="single-movie.css">
+    <link rel="stylesheet" href="single-star.css">
 
+    <title>Single Movie</title>
 </head>
 <body>
+
 <a href="movie-twenty-list.html">
     Back to movies
 </a>
 
-<h1 id="movie_name"></h1>
-<div class="center-button">
-    <button id="add_to_cart_button">Add to Shopping Cart</button>
-</div>
-<dl id="movie_info"></dl>
-<!-- Load jQuery and Bootstrap JS. Copied and pasted this from example file -->
+<!-- H3 body is left empty here, will be populated with the data retrieved with single-star.js -->
+<!-- single-star.js will find this html element by it's id "star_info" -->
+<h3 id="movie_name"></h3>
+<table id=movie_table class="table table-striped" >
+    <thead>
+    <tr id="table_headline">
+        <!-- A BETTER WAY???? -->
+        <th class='headline-large'>Directed By</th>
+        <th class='headline-large'>Release Year</th>
+        <th class='headline-large'>Genres</th>
+        <th class='headline-large'>Starring</th>
+        <th class='headline-large'>Cart</th>
+        <th></th>
+    </tr>
+    </thead>
+
+    <!-- Table body is left empty here, will be populated with the data retrieved with single-star.js -->
+    <!-- single-star.js will find this html element by it's id "movie_table_body" -->
+    <tbody id=movie_info></tbody>
+</table>
+
+<!-- Load jQuery and Bootstrap JS -->
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
 
-<!-- Yes even the single-movie uses functions from the util-movie-list now -->
+<!-- Load our own JS file -->
+<!-- The path is relative to single-star.html, since these two files are in the same directory -->
+<!-- Note the url does not contain a "/" in the beginning, which means the url is relative to current path
+     otherwise the url is relative to the root path-->
 <script src="util-movie-list.js"></script>
 <script src="single-movie.js"></script>
-
 </body>
+
+
 </html>

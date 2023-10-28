@@ -1,24 +1,36 @@
 
 function handleMovieResult(resultData){
-    console.log("Hey, the success callback function was called");
+    console.log("handleResult: populating movie info from resultData");
     let movieName = jQuery("#movie_name");
-    movieName.append("<strong>" + resultData[0]["movie_title"] + "</strong>" + ' ('+resultData[0]["rating"] + ')' );
+    movieName.append("<h1>" + "<strong>" + resultData[0]["movie_title"]  + "</strong>"  + ' ('+resultData[0]["rating"] + ')' + "<h1>" );
+    //    starInfoElement.append("<h1>" +"<strong>" + resultData[0]["star_name"] + "</strong>" + "</h1>" +
+    //         "<p>Date Of Birth: " + resultData[0]["star_dob"] + "</p>");
+
+    console.log("handleResult: populating movie info from resultData");
 
     let entryHTML = "";
 
     let testBodyElement = jQuery("#movie_info")
     //Breaking down the stars array of json objects into a single string of their names
     let stars = resultData[0]["stars"];
-    let genres = resultData[0]["genres"]
+    let genres = resultData[0]["genres"];
     let starString = getList(stars,"name", 1);
     // let genreString= getList(genres,"name", 0);
     let genreString = limitedListLinked(genres,-1,"name","name","movie-browse.html?browsing=true&genre=");
-
-    entryHTML += "<dd>" + 'Directed by: ' + resultData[0]["movie_director"] + "</dd>";
-    entryHTML += "<dd>" + 'Release date: ' + resultData[0]["movie_year"] + "</dd>";
-    entryHTML += "<dd>" + 'Genres: ' + genreString + "<dd/>";
-    entryHTML += "<dd>" + 'Starring: ' + starString + "<dd/>";
-
+    entryHTML += "<tr>";
+    entryHTML += "<div >";
+    entryHTML += "<th class='headline-large'>" + resultData[0]["movie_director"] + "</th>";
+    entryHTML += "<th class='headline-large'>" + resultData[0]["movie_year"] + "</th>";
+    entryHTML += "<th class='headline-large'>" + genreString + "</th>";
+    entryHTML += "<th class='headline-large'>" + starString + "</th>";
+    entryHTML += "<th><button type='button' class='btn btn-outline-primary' id = '" + resultData[0]["movie_id"] + "' name='" + resultData[0]["movie_title"] +"'>Add</button>" + "</th>";
+    entryHTML += "<div/>";
+    entryHTML += "</tr>";
+    //         rowHTML += "<th class='headline-large'>" + '<a href="single-movie.html?id=' + resultData[0]["movies"][i]["movie_id"] + '">' + resultData[0]["movies"][i]["movie_title"] + "</a>" + "</th>";
+    //         rowHTML += "<th class='headline-large'>" + resultData[0]["movies"][i]["movie_year"] + "</th>";
+    //         rowHTML += "<th class='headline-large'>" + resultData[0]["movies"][i]["movie_director"] + "</th>";
+    //         rowHTML += "<div/>"
+    //         rowHTML += "</tr>";
 
     testBodyElement.append(entryHTML);
 
