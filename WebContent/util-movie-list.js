@@ -103,7 +103,7 @@ function buildSortingAndPaginationForm(formName){
 
 }
 
-function buildPaginationLinks(containerName,parameterName){
+function buildPaginationLinks(containerName,parameterName,isLastPage){
     let currentPage= 1;
     let originalLink = window.location.href;
     let backLink = "";
@@ -131,8 +131,13 @@ function buildPaginationLinks(containerName,parameterName){
     else{
         entryHtml += "<a href=" + backLink +">" + "&ltPrev " + "</a>";
     }
+    if (isLastPage===true){
+        entryHtml += "<span> Next&gt </span>"
+    }
+    else{
+        entryHtml += "<a href=" + nextLink + ">" + " Next&gt" + "</a>";
+    }
 
-    entryHtml += "<a href=" + nextLink + ">" + " Next&gt" + "</a>";
 
     containerElement.append(entryHtml)
 

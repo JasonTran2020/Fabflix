@@ -17,10 +17,7 @@ import javax.sql.DataSource;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.*;
-import java.util.AbstractMap;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @WebServlet(name = "MovieSearchServlet",urlPatterns = "/api/search-movie")
 public class MovieSearchServlet extends HttpServlet {
@@ -40,6 +37,8 @@ public class MovieSearchServlet extends HttpServlet {
     private HttpRequestAttribute<String> browsingAttribute;
     private HttpRequestAttribute<String> genreNameAttribute;
     private HttpRequestAttribute<String> charAttribute;
+    private HttpRequestAttribute<String> pageAttribute;
+    private HttpRequestAttribute<String> perPageAttribute;
 
     public void init(ServletConfig config) {
         //Initialize RequestAttributes here with new objects.
@@ -51,6 +50,9 @@ public class MovieSearchServlet extends HttpServlet {
         browsingAttribute = new HttpRequestAttribute<>(String.class,"browsing");
         genreNameAttribute = new HttpRequestAttribute<>(String.class,"genre");
         charAttribute = new HttpRequestAttribute<>(String.class,"char");
+
+        pageAttribute = new HttpRequestAttribute<>(String.class,SessionMovieListParameters.parameterCurrentPage);
+        perPageAttribute = new HttpRequestAttribute<>(String.class,SessionMovieListParameters.parameterMoviesPerPage);
         try {
             dataSource = (DataSource) new InitialContext().lookup("java:comp/env/jdbc/moviedbexample");
         } catch (NamingException e) {
@@ -73,13 +75,16 @@ public class MovieSearchServlet extends HttpServlet {
             //Making a prepare statement as the arguments come from a user with potential malicious intent of using SQL injection
             String isBrowsing = browsingAttribute.get(req);
             String backPage = "";
+            int max=0;
             PreparedStatement statement;
             if (isBrowsing!=null && isBrowsing.equals("true")){
                 statement = buildBrowsePrepareStatement(req,conn);
+                max = getMax(conn,buildBrowseFromWhereClause(req,conn));
                 backPage = "browse";
             }
             else{
                 statement = buildSearchPrepareStatement(req,conn);
+                max = getMax(conn,buildSearchFromWhereClause(req,conn));
                 backPage = "search";
             }
 
@@ -90,7 +95,10 @@ public class MovieSearchServlet extends HttpServlet {
 
             // Log to localhost log
             req.getServletContext().log("getting " + jsonArray.size() + " results");
-            out.write(jsonArray.toString());
+            JsonObject jsonObject = new JsonObject();
+            jsonObject.add("movies",jsonArray);
+            jsonObject.addProperty("isLastPage",MovieListServlet.isLastPage(req,max));
+            out.write(jsonObject.toString());
             //Close the prepared statements
             statement.close();
             resultSet.close();
@@ -115,7 +123,17 @@ public class MovieSearchServlet extends HttpServlet {
 
     }
 
+    private int getMax(Connection conn, PreparedStatement fromWhereClause) throws SQLException {
 
+
+        ResultSet rs = fromWhereClause.executeQuery();
+        rs.next();
+        int result = rs.getInt("max");
+        rs.close();
+        fromWhereClause.close();
+        return result;
+
+    }
     //We return a List of Objects, the base class for all other classes in Java
     //The type List<?> is a valid syntax, BUT, it means something different. It essentially means the list can be any type, BUT ONLY 1 TYPE. As in it can be List<String>, List<int>, BUT NOT List<String and int>
     //List<Object> is what enables the latter
@@ -188,6 +206,59 @@ public class MovieSearchServlet extends HttpServlet {
 
     }
 
+    private PreparedStatement buildSearchFromWhereClause(HttpServletRequest request, Connection conn) throws SQLException {
+        String title = titleAttribute.get(request);
+        String year = yearAttribute.get(request);
+        String director = directorAttribute.get(request);
+        String star = starAttribute.get(request);
+        //boolean first = true;
+        ArrayList<String> args = new ArrayList<>();
+        String result;
+        //Assumption that star is null, in which we don't need to
+        if (star==null || star.isEmpty()){
+            result= "SELECT COUNT(*) as max  FROM movies AS m, ratings AS r WHERE (r.movieId = m.id) ";
+        }
+        //star is not NULL
+        else {
+            result = "SELECT COUNT(*) as max  FROM movies AS m, ratings AS r, stars AS s, stars_in_movies as SIM WHERE (r.movieId = m.id) AND (sim.starId = s.id) AND (sim.movieId = m.id) ";
+            result += " AND " + this.buildLikeQueryString(star,"s.name", args);
+
+        }
+
+        //LIKE is case sensitive, ILIKE is case insensitive. Think ILIKE is more reasonable in this case
+        if (title!=null /*&& first*/ && !title.isEmpty()){
+            result += " AND " + this.buildLikeQueryString(title,"m.title", args);
+            //first = false;
+        }
+
+
+        if (director != null && !director.isEmpty()){
+            result += " AND " + this.buildLikeQueryString(director, "m.director",args);
+        }
+
+        if (year != null  && !year.isEmpty()){
+            result += " AND ( m.year = ?" + ") ";
+            //Manually add year here as we don't use the buildLikeQueryString method here
+            args.add(year);
+            //first = false;
+        }
+        PreparedStatement statement = conn.prepareStatement(result);
+        for (int x = 0; x < args.size(); x++){
+            //The only argument in this whole statement that would NOT be a string is the year, which will have a special if statement to use setInt instead
+            //setString works locally, BUT, there is no assruance that it will work with other db drivers, so let's just be careful and use setInt
+            //Have to check that year is both not null and not empty. Possible to have a year="" by manipulating url
+            if (x == args.size()-1 && year !=null && !year.isEmpty()){
+                statement.setInt(x+1,Integer.parseInt(args.get(x)));
+            }
+            else{
+                //Remember, SQL is 1-based index
+                statement.setString(x+1, args.get(x));
+            }
+        }
+        return statement;
+
+    }
+
     private String buildLikeQueryString(String argument, String columnName, ArrayList<String> args){
         //Ok, why are we storing the args in a parameter in stead of just sticking it into a string? Well, it's for SQL injection security
         //Quite certain that the setArg on a prepared statement is safer than directly building a query from a string.
@@ -248,6 +319,7 @@ public class MovieSearchServlet extends HttpServlet {
         request.getServletContext().log(TAG + " The number of args are \"" + args.size() + "\"");
         request.getServletContext().log(TAG + " Args are \"" + args.toString() + "\"");
         PreparedStatement statement = conn.prepareStatement(result);
+
         for (int x = 0; x < args.size(); x++){
             //Remember, SQL is 1-based index
             statement.setString(x+1, args.get(x));
@@ -255,6 +327,45 @@ public class MovieSearchServlet extends HttpServlet {
         return statement;
 
     }
+
+    private PreparedStatement buildBrowseFromWhereClause(HttpServletRequest request, Connection conn) throws SQLException {
+        String genre = genreNameAttribute.get(request);
+        String character = charAttribute.get(request);
+        ArrayList<String> args = new ArrayList<>();
+        String result = "SELECT COUNT(*) as max  FROM movies AS m, ratings AS r, genres_in_movies AS gim , genres AS g  WHERE (gim.genreId = g.id) AND (gim.movieId = m.id) AND (r.movieId = m.id) ";
+        if (genre!=null && !genre.isEmpty()){
+            result += " AND (g.name = ?) ";
+            args.add(genre);
+        }
+
+        if (character != null && !character.isEmpty() ){
+            //Special case wildcard characters, as we looking for titles that DON'T start with ANY alpha-numeric characters
+            //No insertion to args here
+            if (character.equals("*")){
+                //Honestly not that good with regex, but learned something from this
+                //There are two main things the caret symbol (^) does – it matches the start of a line or the start of a string, and it negates a character set when you put it inside the square brackets
+                //Therefore, this is REGEXP is basically saying "Select the movies where the title STARTS with characers from this set, and the set is saying NOT a-z and 0-9. MySql by default doesn't seem to care for capital letters
+                result += " AND (m.title REGEXP \"^[^a-z0-9]+\" )";
+            }
+            else{
+                result += " AND (m.title LIKE ?)";
+                //Add 0 or more wild card to the end of character
+                args.add(character + "%");
+            }
+
+        }
+        PreparedStatement statement = conn.prepareStatement(result);
+
+        for (int x = 0; x < args.size(); x++){
+            //Remember, SQL is 1-based index
+            statement.setString(x+1, args.get(x));
+        }
+
+        return statement;
+
+    }
+
+
 
 
 

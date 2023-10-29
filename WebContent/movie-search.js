@@ -27,6 +27,10 @@ function submitSearchForm(){
     })
     //quizSearchForm.submit();
 }
+function onSuccess(resultData,name){
+    handleMovieListResult(resultData["movies"],name)
+    buildPaginationLinks("#paginator","p",resultData["isLastPage"])
+}
 
 let url = window.location.href;
 let index = url.indexOf("?")
@@ -37,12 +41,12 @@ if (index!=-1){
 }
 
 buildSortingAndPaginationForm("#sorting-form");
-buildPaginationLinks("#paginator","p")
+
 // Makes the HTTP GET request and registers on success callback function handleMovieListResult
 jQuery.ajax({
     dataType: "json", // Setting return data type
     method: "GET", // Setting request method
     url: "api/search-movie" + parameters, // Setting request url + arguments, which there can be many forms. Simply going to slice of the original url's parameters and cocatentate them to the API url
     //Not a huge fan of doing that, as that requires the names from HTML to match the parameters name expected in the servlet.
-    success: (resultData) => handleMovieListResult(resultData, "#movie_table") // Setting callback function to handle data returned successfully by the StarsServlet
+    success: (resultData) => onSuccess(resultData, "#movie_table") // Setting callback function to handle data returned successfully by the StarsServlet
 });

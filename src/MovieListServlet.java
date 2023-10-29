@@ -168,7 +168,7 @@ public class MovieListServlet extends HttpServlet {
         }
     }
 
-    private static int handleParseInt(String input, int defaultValue){
+    public static int handleParseInt(String input, int defaultValue){
         try{
             return Integer.parseInt(input);
         }
@@ -176,7 +176,23 @@ public class MovieListServlet extends HttpServlet {
             return defaultValue;
         }
     }
+    public static boolean isLastPage(HttpServletRequest request, int max){
+        HttpRequestAttribute<String> perPageAttribute = new HttpRequestAttribute<>(String.class,SessionMovieListParameters.parameterMoviesPerPage);
+        HttpRequestAttribute<String> pageAttribute = new HttpRequestAttribute<>(String.class,SessionMovieListParameters.parameterCurrentPage);
+        request.getServletContext().log(TAG + "perpage is: " + perPageAttribute.get(request));
+        request.getServletContext().log(TAG + " page is: " + pageAttribute.get(request));
+        List permittedPerPage = Arrays.asList(10, 25, 50, 100);
 
+        int perPageInt = MovieListServlet.handleParseInt(perPageAttribute.get(request),25);
+        int pageInt = MovieListServlet.handleParseInt(pageAttribute.get(request),1);
+        if (pageInt<=0){
+            pageInt = 1;
+        }
+        if (permittedPerPage.contains(perPageInt)){
+            return perPageInt*(pageInt-1)+perPageInt >= max;
+        }
+        return (25*(pageInt-1))+perPageInt >= max;
+    }
     public static void saveMovieListParameters(HttpServletRequest req,String backPage){
         HttpSession session = req.getSession();
         String result = SessionMovieListParameters.parseParametersStringFromRequest(req);
