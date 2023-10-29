@@ -6,6 +6,8 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+
+import javax.sql.DataSource;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -16,6 +18,10 @@ import java.util.Date;
  */
 @WebServlet(name = "IndexServlet", urlPatterns = "/api/index")
 public class IndexServlet extends HttpServlet {
+    private static final long serialVersionUID = 9L;
+    public static String TAG = "IndexServlet: ";
+    // Create a dataSource which registered in web.xml
+    private DataSource dataSource;
 
     /**
      * handles GET requests to store session information
@@ -95,6 +101,6 @@ public class IndexServlet extends HttpServlet {
         responseJsonObject.add("previousItems", previousItemsJsonArray);
 
         response.getWriter().write(responseJsonObject.toString());
-
+        response.setStatus(200);
     }
 }

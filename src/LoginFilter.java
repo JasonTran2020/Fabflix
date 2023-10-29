@@ -2,6 +2,8 @@ import jakarta.servlet.*;
 import jakarta.servlet.annotation.WebFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+
+import javax.sql.DataSource;
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -10,6 +12,12 @@ import java.util.ArrayList;
  */
 @WebFilter(filterName = "LoginFilter", urlPatterns = "/*")
 public class LoginFilter implements Filter {
+
+    private static final long serialVersionUID = 8L;
+    public static final String TAG = "LoginFilter";
+    private DataSource dataSource;
+
+
     private final ArrayList<String> allowedURIs = new ArrayList<>();
 
     /**
