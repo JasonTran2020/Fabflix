@@ -45,7 +45,6 @@ $(document).ready(function() {
             url: "api/payment",
             data: JSON.stringify(paymentData),
             contentType: "application/json; charset=utf-8",
-            dataType: "json",
             success: function() {
                 window.location.href = "confirmation.html";
             },
