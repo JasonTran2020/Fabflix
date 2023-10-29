@@ -39,6 +39,13 @@ public class MovieSearchServlet extends HttpServlet {
     private HttpRequestAttribute<String> charAttribute;
     private HttpRequestAttribute<String> pageAttribute;
     private HttpRequestAttribute<String> perPageAttribute;
+    private final String sqlSelectCountClause = "SELECT COUNT(*) as max ";
+    private final String sqlSearchSelectClause = "SELECT * FROM ";
+    private final String sqlSearchFromWhereWithStarClause = " FROM movies AS m, ratings AS r, stars AS s, stars_in_movies as SIM WHERE (r.movieId = m.id) AND (sim.starId = s.id) AND (sim.movieId = m.id) ";
+    private final String sqlSearchFromWhereNoStarClause = " FROM movies AS m, ratings AS r WHERE (r.movieId = m.id) ";
+    private final String sqlBrowseSelectClause = "SELECT DISTINCT m.id,m.title,m.year,m.director,r.rating,r.numVotes  ";
+    private final String sqlBrowseFromWhereClause = " FROM movies AS m, ratings AS r, genres_in_movies AS gim , genres AS g  WHERE (gim.genreId = g.id) AND (gim.movieId = m.id) AND (r.movieId = m.id)  ";
+
 
     public void init(ServletConfig config) {
         //Initialize RequestAttributes here with new objects.
@@ -78,13 +85,13 @@ public class MovieSearchServlet extends HttpServlet {
             int max=0;
             PreparedStatement statement;
             if (isBrowsing!=null && isBrowsing.equals("true")){
-                statement = buildBrowsePrepareStatement(req,conn);
-                max = getMax(conn,buildBrowseFromWhereClause(req,conn));
+                statement = buildBrowsePrepareStatement(req,conn,sqlBrowseSelectClause,true);
+                max = getMax(buildBrowsePrepareStatement(req,conn,sqlSelectCountClause,false));
                 backPage = "browse";
             }
             else{
-                statement = buildSearchPrepareStatement(req,conn);
-                max = getMax(conn,buildSearchFromWhereClause(req,conn));
+                statement = buildSearchPrepareStatement(req,conn,sqlSearchSelectClause,true);
+                max = getMax(buildSearchPrepareStatement(req,conn,sqlSelectCountClause,false));
                 backPage = "search";
             }
 
@@ -123,7 +130,7 @@ public class MovieSearchServlet extends HttpServlet {
 
     }
 
-    private int getMax(Connection conn, PreparedStatement fromWhereClause) throws SQLException {
+    private int getMax( PreparedStatement fromWhereClause) throws SQLException {
 
 
         ResultSet rs = fromWhereClause.executeQuery();
@@ -138,7 +145,7 @@ public class MovieSearchServlet extends HttpServlet {
     //The type List<?> is a valid syntax, BUT, it means something different. It essentially means the list can be any type, BUT ONLY 1 TYPE. As in it can be List<String>, List<int>, BUT NOT List<String and int>
     //List<Object> is what enables the latter
     //UPDATE: Yea not going that way anymore, but leaving the comments here because it's useful to learn the diff between ? and Object
-    private PreparedStatement buildSearchPrepareStatement(HttpServletRequest request,Connection conn) throws SQLException {
+    private PreparedStatement buildSearchPrepareStatement(HttpServletRequest request,Connection conn, String selectClause, boolean usePagination) throws SQLException {
         //This method will return a string query meant to be used in a prepared statement, and a list of string arguments also meant to be used in the same prepared statement
         String title = titleAttribute.get(request);
         String year = yearAttribute.get(request);
@@ -149,11 +156,13 @@ public class MovieSearchServlet extends HttpServlet {
         String result;
         //Assumption that star is null, in which we don't need to
         if (star==null || star.isEmpty()){
-            result= "SELECT * FROM movies AS m, ratings AS r WHERE (r.movieId = m.id) ";
+            result = "SELECT * FROM movies AS m, ratings AS r WHERE (r.movieId = m.id) ";
+            result = selectClause + sqlSearchFromWhereNoStarClause;
         }
         //star is not NULL
         else {
             result = "SELECT * FROM movies AS m, ratings AS r, stars AS s, stars_in_movies as SIM WHERE (r.movieId = m.id) AND (sim.starId = s.id) AND (sim.movieId = m.id) ";
+            result = selectClause + sqlSearchFromWhereWithStarClause;
             result += " AND " + this.buildLikeQueryString(star,"s.name", args);
             //first = false;
         }
@@ -182,7 +191,10 @@ public class MovieSearchServlet extends HttpServlet {
 //            result += " AND m.year = " + year.toString();
 //        }
         //Terminate the statement
-        result += MovieListServlet.buildOrderByClause(request,"m","r" ) + " " + MovieListServlet.buildPaginationClause(request);
+        if (usePagination){
+            result += MovieListServlet.buildOrderByClause(request,"m","r" ) + " " + MovieListServlet.buildPaginationClause(request);
+        }
+
         request.getServletContext().log(TAG + " The complete SQL statement is \"" + result + "\"");
         request.getServletContext().log(TAG + " The number of args are \"" + args.size() + "\"");
         request.getServletContext().log(TAG + " Args are \"" + args.toString() + "\"");
@@ -206,58 +218,6 @@ public class MovieSearchServlet extends HttpServlet {
 
     }
 
-    private PreparedStatement buildSearchFromWhereClause(HttpServletRequest request, Connection conn) throws SQLException {
-        String title = titleAttribute.get(request);
-        String year = yearAttribute.get(request);
-        String director = directorAttribute.get(request);
-        String star = starAttribute.get(request);
-        //boolean first = true;
-        ArrayList<String> args = new ArrayList<>();
-        String result;
-        //Assumption that star is null, in which we don't need to
-        if (star==null || star.isEmpty()){
-            result= "SELECT COUNT(*) as max  FROM movies AS m, ratings AS r WHERE (r.movieId = m.id) ";
-        }
-        //star is not NULL
-        else {
-            result = "SELECT COUNT(*) as max  FROM movies AS m, ratings AS r, stars AS s, stars_in_movies as SIM WHERE (r.movieId = m.id) AND (sim.starId = s.id) AND (sim.movieId = m.id) ";
-            result += " AND " + this.buildLikeQueryString(star,"s.name", args);
-
-        }
-
-        //LIKE is case sensitive, ILIKE is case insensitive. Think ILIKE is more reasonable in this case
-        if (title!=null /*&& first*/ && !title.isEmpty()){
-            result += " AND " + this.buildLikeQueryString(title,"m.title", args);
-            //first = false;
-        }
-
-
-        if (director != null && !director.isEmpty()){
-            result += " AND " + this.buildLikeQueryString(director, "m.director",args);
-        }
-
-        if (year != null  && !year.isEmpty()){
-            result += " AND ( m.year = ?" + ") ";
-            //Manually add year here as we don't use the buildLikeQueryString method here
-            args.add(year);
-            //first = false;
-        }
-        PreparedStatement statement = conn.prepareStatement(result);
-        for (int x = 0; x < args.size(); x++){
-            //The only argument in this whole statement that would NOT be a string is the year, which will have a special if statement to use setInt instead
-            //setString works locally, BUT, there is no assruance that it will work with other db drivers, so let's just be careful and use setInt
-            //Have to check that year is both not null and not empty. Possible to have a year="" by manipulating url
-            if (x == args.size()-1 && year !=null && !year.isEmpty()){
-                statement.setInt(x+1,Integer.parseInt(args.get(x)));
-            }
-            else{
-                //Remember, SQL is 1-based index
-                statement.setString(x+1, args.get(x));
-            }
-        }
-        return statement;
-
-    }
 
     private String buildLikeQueryString(String argument, String columnName, ArrayList<String> args){
         //Ok, why are we storing the args in a parameter in stead of just sticking it into a string? Well, it's for SQL injection security
@@ -286,12 +246,13 @@ public class MovieSearchServlet extends HttpServlet {
 
     }
 
-    private PreparedStatement buildBrowsePrepareStatement(HttpServletRequest request,Connection conn) throws SQLException {
+    private PreparedStatement buildBrowsePrepareStatement(HttpServletRequest request,Connection conn, String selectClause,boolean usePagination) throws SQLException {
         String genre = genreNameAttribute.get(request);
         String character = charAttribute.get(request);
         ArrayList<String> args = new ArrayList<>();
         //Selecting individual columns and using DISTINCT as a movie can have several genres, causing duplicate data, unlike ratings which has a 1 to 1 relationship with movies
         String result = "SELECT DISTINCT m.id,m.title,m.year,m.director,r.rating,r.numVotes FROM movies AS m, ratings AS r, genres_in_movies AS gim , genres AS g  WHERE (gim.genreId = g.id) AND (gim.movieId = m.id) AND (r.movieId = m.id) ";
+        result = selectClause + sqlBrowseFromWhereClause;
 
         if (genre!=null && !genre.isEmpty()){
             result += " AND (g.name = ?) ";
@@ -314,7 +275,10 @@ public class MovieSearchServlet extends HttpServlet {
             }
 
         }
-        result += MovieListServlet.buildOrderByClause(request,"m","r" ) + " " + MovieListServlet.buildPaginationClause(request);
+        if (usePagination){
+            result += MovieListServlet.buildOrderByClause(request,"m","r" ) + " " + MovieListServlet.buildPaginationClause(request);
+        }
+
         request.getServletContext().log(TAG + " The complete SQL statement is \"" + result + "\"");
         request.getServletContext().log(TAG + " The number of args are \"" + args.size() + "\"");
         request.getServletContext().log(TAG + " Args are \"" + args.toString() + "\"");
@@ -327,47 +291,5 @@ public class MovieSearchServlet extends HttpServlet {
         return statement;
 
     }
-
-    private PreparedStatement buildBrowseFromWhereClause(HttpServletRequest request, Connection conn) throws SQLException {
-        String genre = genreNameAttribute.get(request);
-        String character = charAttribute.get(request);
-        ArrayList<String> args = new ArrayList<>();
-        String result = "SELECT COUNT(*) as max  FROM movies AS m, ratings AS r, genres_in_movies AS gim , genres AS g  WHERE (gim.genreId = g.id) AND (gim.movieId = m.id) AND (r.movieId = m.id) ";
-        if (genre!=null && !genre.isEmpty()){
-            result += " AND (g.name = ?) ";
-            args.add(genre);
-        }
-
-        if (character != null && !character.isEmpty() ){
-            //Special case wildcard characters, as we looking for titles that DON'T start with ANY alpha-numeric characters
-            //No insertion to args here
-            if (character.equals("*")){
-                //Honestly not that good with regex, but learned something from this
-                //There are two main things the caret symbol (^) does – it matches the start of a line or the start of a string, and it negates a character set when you put it inside the square brackets
-                //Therefore, this is REGEXP is basically saying "Select the movies where the title STARTS with characers from this set, and the set is saying NOT a-z and 0-9. MySql by default doesn't seem to care for capital letters
-                result += " AND (m.title REGEXP \"^[^a-z0-9]+\" )";
-            }
-            else{
-                result += " AND (m.title LIKE ?)";
-                //Add 0 or more wild card to the end of character
-                args.add(character + "%");
-            }
-
-        }
-        PreparedStatement statement = conn.prepareStatement(result);
-
-        for (int x = 0; x < args.size(); x++){
-            //Remember, SQL is 1-based index
-            statement.setString(x+1, args.get(x));
-        }
-
-        return statement;
-
-    }
-
-
-
-
-
 
 }
