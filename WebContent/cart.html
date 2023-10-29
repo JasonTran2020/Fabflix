@@ -1,10 +1,3 @@
-<!-- This example is following frontend and backend separation.
-
-    This .html performs two steps:
-    1. Create a html template skeleton, with all the elements defined (some left empty) and named with ids.
-    2. Load single-star.js to populate the data into empty elements.
-    -->
-
 <!doctype html>
 <html lang="en">
 <head>
@@ -20,7 +13,7 @@
     <!-- If this file need something different, then it will be override by the single-star.css, as it is declared after the base.css file -->
     <link rel="stylesheet" href="single-star.css">
 
-    <title>Single Star</title>
+    <title>Shopping Cart</title>
 </head>
 <body>
 
@@ -28,31 +21,28 @@
     Back to movies
 </a>
 
-<a href="cart.html" style="float: right;">
-    Checkout
-</a>
 <div style="clear: both;"></div> <!-- This is added to clear the floats -->
 
-
-<!-- H3 body is left empty here, will be populated with the data retrieved with single-star.js -->
-<!-- single-star.js will find this html element by it's id "star_info" -->
-<h3 id="star_info"></h3>
-<table id=movie_table class="table table-striped" >
+<h3 id="cart_info"></h3>
+<table id="movie_table" class="table table-striped" >
     <thead>
     <tr id="table_headline">
         <!-- A BETTER WAY???? -->
         <th class='headline-large'>Movie Title</th>
-        <th class='headline-large'>Release Year</th>
-        <th class='headline-large'>Director</th>
-        <th class='headline-large'>Cart</th>
+        <th class='headline-large'>Quantity</th>
+        <th class='headline-large'>Delete</th>
+        <th class='headline-large'>Price</th>
+        <th class='headline-large'>Total</th>
         <th></th>
     </tr>
     </thead>
 
     <!-- Table body is left empty here, will be populated with the data retrieved with single-star.js -->
-    <!-- single-star.js will find this html element by it's id "movie_table_body" -->
-    <tbody id=movie_table_body></tbody>
+    <tbody id="shopping_cart_body"></tbody>
 </table>
+
+<!-- Displaying the Overall Total Price -->
+<h3>Total: $<span id="overallTotal">0</span></h3>
 
 <!-- Load jQuery and Bootstrap JS -->
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
@@ -64,9 +54,8 @@
 <!-- Note the url does not contain a "/" in the beginning, which means the url is relative to current path
      otherwise the url is relative to the root path-->
 <script src="util-cart-items.js"></script>
-<script src="util-cart-items.js"></script>
+<script src="util-movie-list.js"></script>
 <script src="cart.js"></script>
 </body>
-
 
 </html>
