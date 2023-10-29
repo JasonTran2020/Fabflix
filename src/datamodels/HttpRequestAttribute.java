@@ -4,7 +4,7 @@ import jakarta.servlet.http.HttpServletRequest;
 
 public class HttpRequestAttribute<T> {
     private final Class<T> type;
-    private final String name;
+    public final String name;
     public HttpRequestAttribute(Class<T> type, String name) {
         this.type = type;
         this.name = name;

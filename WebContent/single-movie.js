@@ -87,4 +87,11 @@ jQuery.ajax({
     success: (resultData) => handleMovieResult(resultData) // Setting callback function to handle data returned successfully by the StarsServlet
 });
 
+jQuery.ajax({
+    dataType: "json", // Setting return data type
+    method: "GET", // Setting request method
+    url: "api/remember-movie-parameters" ,
+    success: (resultData) => handleJumpBackLink("#backlink",resultData) // Setting callback function to handle data returned successfully by the StarsServlet
+});
+
 

@@ -1,12 +1,15 @@
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import datamodels.HttpRequestAttribute;
+import datamodels.SessionMovieListParameters;
+import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -69,12 +72,15 @@ public class MovieSearchServlet extends HttpServlet {
             //Build out a query and arguments using parameters from the HttpServletRequest which may contain the title, year, director, and/or star
             //Making a prepare statement as the arguments come from a user with potential malicious intent of using SQL injection
             String isBrowsing = browsingAttribute.get(req);
+            String backPage = "";
             PreparedStatement statement;
             if (isBrowsing!=null && isBrowsing.equals("true")){
                 statement = buildBrowsePrepareStatement(req,conn);
+                backPage = "browse";
             }
             else{
                 statement = buildSearchPrepareStatement(req,conn);
+                backPage = "search";
             }
 
             ResultSet resultSet = statement.executeQuery();
@@ -86,10 +92,10 @@ public class MovieSearchServlet extends HttpServlet {
             req.getServletContext().log("getting " + jsonArray.size() + " results");
             out.write(jsonArray.toString());
             //Close the prepared statements
-
             statement.close();
-            //Close the resultset
             resultSet.close();
+            //Method to save current parameters to a session to be used when "jumping" between pages
+            MovieListServlet.saveMovieListParameters(req,backPage);
             // Set response status to 200 (OK)
             resp.setStatus(200);
 

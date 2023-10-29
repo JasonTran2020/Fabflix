@@ -1,12 +1,15 @@
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import datamodels.HttpRequestAttribute;
+import datamodels.SessionMovieListParameters;
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -172,6 +175,14 @@ public class MovieListServlet extends HttpServlet {
         catch (Exception e){
             return defaultValue;
         }
+    }
+
+    public static void saveMovieListParameters(HttpServletRequest req,String backPage){
+        HttpSession session = req.getSession();
+        String result = SessionMovieListParameters.parseParametersStringFromRequest(req);
+        session.setAttribute(SessionMovieListParameters.sessionKeyName,result);
+        session.setAttribute(SessionMovieListParameters.sessionKeyBackPage, backPage);
+        req.getServletContext().log(TAG +": The parameters that were saved were " + result);
     }
 
 
