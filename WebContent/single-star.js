@@ -67,7 +67,7 @@ function handleResult(resultData) {
         rowHTML += "<th class='headline-large'>" + '<a href="single-movie.html?id=' + resultData[0]["movies"][i]["movie_id"] + '">' + resultData[0]["movies"][i]["movie_title"] + "</a>" + "</th>";
         rowHTML += "<th class='headline-large'>" + resultData[0]["movies"][i]["movie_year"] + "</th>";
         rowHTML += "<th class='headline-large'>" + resultData[0]["movies"][i]["movie_director"] + "</th>";
-        rowHTML += "<th><button type='button' class='btn btn-outline-primary' id='" + resultData[i]["movie_id"] + "'>Add</button></th>";
+        rowHTML += "<th><button type='button' class='btn btn-outline-primary' id='" + resultData[0]["movies"][i]["movie_id"] + "'>Add</button></th>";
         rowHTML += "<div/>"
         rowHTML += "</tr>";
 
@@ -91,4 +91,12 @@ jQuery.ajax({
     method: "GET",// Setting request method
     url: "api/single-star?id=" + starId, // Setting request url, which is mapped by StarsServlet in Stars.java
     success: (resultData) => handleResult(resultData) // Setting callback function to handle data returned successfully by the SingleStarServlet
+});
+
+//To create the correct back to movies link that saves all parameters from before
+jQuery.ajax({
+    dataType: "json", // Setting return data type
+    method: "GET", // Setting request method
+    url: "api/remember-movie-parameters" ,
+    success: (resultData) => handleJumpBackLink("#backlink",resultData) // Setting callback function to handle data returned successfully by the StarsServlet
 });

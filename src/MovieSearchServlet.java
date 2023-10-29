@@ -243,7 +243,7 @@ public class MovieSearchServlet extends HttpServlet {
             }
 
         }
-        result += " ORDER BY (r.rating) DESC LIMIT 20;";
+        result += MovieListServlet.buildOrderByClause(request,"m","r" ) + " " + MovieListServlet.buildPaginationClause(request);
         request.getServletContext().log(TAG + " The complete SQL statement is \"" + result + "\"");
         request.getServletContext().log(TAG + " The number of args are \"" + args.size() + "\"");
         request.getServletContext().log(TAG + " Args are \"" + args.toString() + "\"");
