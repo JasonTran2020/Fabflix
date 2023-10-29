@@ -67,13 +67,14 @@ function handleResult(resultData) {
         rowHTML += "<th class='headline-large'>" + '<a href="single-movie.html?id=' + resultData[0]["movies"][i]["movie_id"] + '">' + resultData[0]["movies"][i]["movie_title"] + "</a>" + "</th>";
         rowHTML += "<th class='headline-large'>" + resultData[0]["movies"][i]["movie_year"] + "</th>";
         rowHTML += "<th class='headline-large'>" + resultData[0]["movies"][i]["movie_director"] + "</th>";
-        rowHTML += "<th><button type='button' class='btn btn-outline-primary' id = '" + resultData[0]["movie_id"] + "' name='" + resultData[0]["movie_title"] +"'>Add</button>" + "</th>";
+        rowHTML += "<th><button type='button' class='btn btn-outline-primary' id='" + resultData[i]["movie_id"] + "'>Add</button></th>";
         rowHTML += "<div/>"
         rowHTML += "</tr>";
 
     }
     // Append the row created to the table body, which will refresh the page
     movieTableBodyElement.append(rowHTML);
+    movieTableBodyElement.on("click", ".btn-outline-primary", handleAddButtonClick); // Event delegation
 
 }
 

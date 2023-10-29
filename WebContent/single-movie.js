@@ -1,17 +1,5 @@
 
-function addToCart(event, movie_id) {
-    console.log("adding one movie to cart");
 
-    jQuery.ajax({
-        dataType: "json",
-        method: "POST",
-        url: "api/index?movieid=" + movie_id + "&action=add",
-        success: function() {
-            alert("Movie added to cart successfully!");
-        }
-    });
-
-}
 function handleMovieResult(resultData){
     console.log("handleResult: populating movie info from resultData");
     let movieName = jQuery("#movie_name");
@@ -47,9 +35,7 @@ function handleMovieResult(resultData){
 
     testBodyElement.append(entryHTML);
 
-    $(document).on("click", '.btn', function(event) {
-        addToCart(event, this.id);
-    });
+    testBodyElement.on("click", ".btn-outline-primary", handleAddButtonClick); // Event delegation
 }
 
 function getList(theList, propertyName, flag){

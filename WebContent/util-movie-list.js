@@ -16,6 +16,13 @@ function getParameterByName(target) {
     return decodeURIComponent(results[2].replace(/\+/g, " "));
 }
 
+function handleAddButtonClick(event) {
+    // Get the movie_id from the button's id attribute
+    let movieId = event.target.id;
+    console.log("Add button clicked for movie: " + movieId);
+    addToCart(event, movieId);
+
+}
 function handleMovieListResult(resultData, tableName){
     console.log("Hey, the success callback function was called");
 
@@ -54,7 +61,7 @@ function handleMovieListResult(resultData, tableName){
         entryHTML += "<td class='headline-medium'>" + jsonObject["director"] + "</td>";
         entryHTML += "<td class='headline-medium'>" + genreString + "</td>";
         entryHTML += "<td class='headline-medium'>" + starString + "</td>";
-        entryHTML += "<th><button type='button' class='btn btn-outline-primary' id = '" + resultData[0]["movie_id"] + "' name='" + resultData[0]["movie_title"] +"'>Add</button>" + "</th>";
+        entryHTML += "<td><button type='button' class='btn btn-outline-primary' id='" + resultData[i]["movie_id"] + "'>Add</button></td>";
         entryHTML += "</tr>";
 
 
@@ -62,6 +69,8 @@ function handleMovieListResult(resultData, tableName){
         testBodyElement.append(entryHTML);
 
     }
+    testBodyElement.on("click", ".btn-outline-primary", handleAddButtonClick); // Event delegation
+
 }
 
 function buildSortingAndPaginationForm(formName){
