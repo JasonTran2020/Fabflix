@@ -48,7 +48,11 @@ public class LoginServlet extends HttpServlet {
         /  in the real project, you should talk to the database to verify username/password
         */
         try (Connection conn = dataSource.getConnection()) {
-            String login_info_query = "SELECT * FROM customers WHERE email = ?";
+            String login_info_query = "SELECT c.*, cr.expiration \n" +
+                    "FROM customers c \n" +
+                    "JOIN creditcards cr ON c.ccId = cr.id \n" +
+                    "WHERE c.email = ?;\n";
+
             PreparedStatement statement = conn.prepareStatement(login_info_query);
 
             statement.setString(1, username);
@@ -62,10 +66,11 @@ public class LoginServlet extends HttpServlet {
                 String dbFirstName = resultSet.getString("firstName");
                 String dbLastName = resultSet.getString("lastName");
                 String dbCcId = resultSet.getString("ccId");
+                String dbExpiryDate = resultSet.getString("expiration");
                 String dbAddress = resultSet.getString("address");
                 // Assuming passwords are stored as plaintext for this example, but hashing should be used.
                 if (username.equals(dbEmail) && password.equals(dbPassword)) {
-                    request.getSession().setAttribute("user", new User(dbEmail, dbId, dbFirstName, dbLastName, dbCcId, dbAddress));
+                    request.getSession().setAttribute("user", new User(dbEmail, dbId, dbFirstName, dbLastName, dbCcId, dbExpiryDate, dbAddress));
                     responseJsonObject.addProperty("status", "success");
                     responseJsonObject.addProperty("message", "success");
 

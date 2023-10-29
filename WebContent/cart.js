@@ -1,3 +1,8 @@
+function goToPaymentPage() {
+    let overallTotal = $("#overallTotal").text();
+    window.location.href = "payment.html?total=" + overallTotal;
+}
+
 function updateOverallTotal() {
     let overallTotal = 0;
     // Loop through all rows and sum up the total prices

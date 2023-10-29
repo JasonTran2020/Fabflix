@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Payment on Fabflix</title>
+    <link rel="stylesheet" href="general-css-files/tokens.css">
+    <link rel="stylesheet" href="general-css-files/typography.module.css">
+    <link rel="stylesheet" href="base.css">
+</head>
+<body>
+
+<h2>Payment for Fabflix</h2>
+
+<form id="payment_form" method="post" action="#">
+    <label><b>First Name of Card Holder</b></label>
+    <label>
+        <input name="firstName" placeholder="Enter First Name" type="text">
+    </label>
+    <br>
+    <label><b>Last Name of Card Holder</b></label>
+    <label>
+        <input name="lastName" placeholder="Enter Last Name" type="text">
+    </label>
+    <br>
+    <label><b>Credit Card Number</b></label>
+    <label>
+        <input name="cardNumber" placeholder="Enter Credit Card Number" type="text">
+    </label>
+    <br>
+    <label><b>Expiration Date</b></label>
+    <label>
+        <input name="expiryDate" placeholder="YYYY-MM-DD" type="text">
+    </label>
+    <br>
+    <input type="submit" value="Place Order">
+    <span id="totalPriceDisplay"></span>
+</form>
+
+
+
+<!-- include jQuery-->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<!-- include our own JS file -->
+<script src="./payment.js"></script>
+
+</body>
+</html>
