@@ -77,14 +77,14 @@ function buildSortingAndPaginationForm(formName){
     //Should probably combine this with buildPaginationLinks
     let inputFormElement = jQuery(formName);
 
-    let entryHtml = "    <select name=\"pp\">\n" +
+    let entryHtml = "    <select id=\"pp\" name=\"pp\">\n" +
         "        <option value=\"10\">10</option>\n" +
         "        <option value=\"25\" selected=\"selected\">25</option>\n" +
         "        <option value=\"50\">50</option>\n" +
         "        <option value=\"100\">100</option>\n" +
         "    </select>\n" +
         "     results per page, sort by\n" +
-        "    <select name=\"orderby\">\n" +
+        "    <select id=\"orderby\" name=\"orderby\">\n" +
         "        <option value=\"rata\">rating asc, title asc</option>\n" +
         "        <option value=\"ratd\">rating asc, title desc</option>\n" +
         "        <option value=\"rdta\" selected=\"selected\" >rating desc, title asc</option>\n" +
@@ -95,7 +95,7 @@ function buildSortingAndPaginationForm(formName){
         "        <option value=\"tdrd\">title desc, rating desc</option>\n" +
 
         "     order.\n" +
-        "    <input name='p' hidden='hidden' value='1'>"
+        "    <input name='p' hidden='hidden' value='1'>";
 
 
     inputFormElement.append(entryHtml)
@@ -103,6 +103,27 @@ function buildSortingAndPaginationForm(formName){
 
 }
 
+function populateSortingAndPaginationForm(){
+    //Cannot use populateInput as these select elements
+    let ppParam=getParameterByName("pp");
+    if (ppParam!==""){
+        jQuery("option[value="+ppParam+"]").prop("selected","selected")
+        // populateInput("option[value="+getParameterByName("pp")+"]","pp");
+    }
+
+    let pageParam = getParameterByName("orderby");
+    if (pageParam!==""){
+        jQuery("option[value="+pageParam+"]").prop("selected","selected");
+    }
+
+}
+function populateInput(elementId, parameterName){
+    let inputElement = jQuery(elementId);
+    let value = getParameterByName(parameterName);
+    if (value!==""){
+        inputElement.val(value)
+    }
+}
 function buildPaginationLinks(containerName,parameterName,isLastPage){
     let currentPage= 1;
     let originalLink = window.location.href;

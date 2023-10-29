@@ -40,8 +40,8 @@ public class MovieSearchServlet extends HttpServlet {
     private HttpRequestAttribute<String> pageAttribute;
     private HttpRequestAttribute<String> perPageAttribute;
     private final String sqlSelectCountClause = "SELECT COUNT(*) as max ";
-    private final String sqlSearchSelectClause = "SELECT * FROM ";
-    private final String sqlSearchFromWhereWithStarClause = " FROM movies AS m, ratings AS r, stars AS s, stars_in_movies as SIM WHERE (r.movieId = m.id) AND (sim.starId = s.id) AND (sim.movieId = m.id) ";
+    private final String sqlSearchSelectClause = "SELECT * ";
+    private final String sqlSearchFromWhereWithStarClause = " FROM movies AS m, ratings AS r, stars AS s, stars_in_movies as sim WHERE (r.movieId = m.id) AND (sim.starId = s.id) AND (sim.movieId = m.id) ";
     private final String sqlSearchFromWhereNoStarClause = " FROM movies AS m, ratings AS r WHERE (r.movieId = m.id) ";
     private final String sqlBrowseSelectClause = "SELECT DISTINCT m.id,m.title,m.year,m.director,r.rating,r.numVotes  ";
     private final String sqlBrowseFromWhereClause = " FROM movies AS m, ratings AS r, genres_in_movies AS gim , genres AS g  WHERE (gim.genreId = g.id) AND (gim.movieId = m.id) AND (r.movieId = m.id)  ";
@@ -161,7 +161,7 @@ public class MovieSearchServlet extends HttpServlet {
         }
         //star is not NULL
         else {
-            result = "SELECT * FROM movies AS m, ratings AS r, stars AS s, stars_in_movies as SIM WHERE (r.movieId = m.id) AND (sim.starId = s.id) AND (sim.movieId = m.id) ";
+            result = "SELECT * FROM movies AS m, ratings AS r, stars AS s, stars_in_movies as sim WHERE (r.movieId = m.id) AND (sim.starId = s.id) AND (sim.movieId = m.id) ";
             result = selectClause + sqlSearchFromWhereWithStarClause;
             result += " AND " + this.buildLikeQueryString(star,"s.name", args);
             //first = false;

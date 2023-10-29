@@ -1,3 +1,10 @@
+
+function onSuccess(resultData,name){
+    handleMovieListResult(resultData["movies"],name)
+    buildPaginationLinks("#paginator", "p", resultData["isLastPage"])
+
+}
+
 let url = window.location.href;
 let index = url.indexOf("?")
 let parameters=""
@@ -10,12 +17,8 @@ jQuery("#genreid").val(getParameterByName("genre"))
 jQuery("#charid").val(getParameterByName("char"))
 
 buildSortingAndPaginationForm("#sorting-form");
+populateSortingAndPaginationForm();
 
-function onSuccess(resultData,name){
-    handleMovieListResult(resultData["movies"],name)
-    buildPaginationLinks("#paginator", "p", resultData["isLastPage"])
-
-}
 // Makes the HTTP GET request and registers on success callback function handleMovieListResult
 jQuery.ajax({
     dataType: "json", // Setting return data type

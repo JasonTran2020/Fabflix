@@ -27,6 +27,14 @@ function submitSearchForm(){
     })
     //quizSearchForm.submit();
 }
+
+function populateSearchForm(){
+    populateInput("#title","title");
+    populateInput("#director","director");
+    populateInput("#year","year");
+    populateInput("#star","star");
+}
+
 function onSuccess(resultData,name){
     handleMovieListResult(resultData["movies"],name)
     buildPaginationLinks("#paginator","p",resultData["isLastPage"])
@@ -41,7 +49,8 @@ if (index!=-1){
 }
 
 buildSortingAndPaginationForm("#sorting-form");
-
+populateSortingAndPaginationForm();
+populateSearchForm();
 // Makes the HTTP GET request and registers on success callback function handleMovieListResult
 jQuery.ajax({
     dataType: "json", // Setting return data type
