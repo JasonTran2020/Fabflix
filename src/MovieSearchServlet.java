@@ -156,12 +156,12 @@ public class MovieSearchServlet extends HttpServlet {
         String result;
         //Assumption that star is null, in which we don't need to
         if (star==null || star.isEmpty()){
-            result = "SELECT * FROM movies AS m, ratings AS r WHERE (r.movieId = m.id) ";
+
             result = selectClause + sqlSearchFromWhereNoStarClause;
         }
         //star is not NULL
         else {
-            result = "SELECT * FROM movies AS m, ratings AS r, stars AS s, stars_in_movies as sim WHERE (r.movieId = m.id) AND (sim.starId = s.id) AND (sim.movieId = m.id) ";
+
             result = selectClause + sqlSearchFromWhereWithStarClause;
             result += " AND " + this.buildLikeQueryString(star,"s.name", args);
             //first = false;
@@ -172,9 +172,7 @@ public class MovieSearchServlet extends HttpServlet {
             result += " AND " + this.buildLikeQueryString(title,"m.title", args);
             //first = false;
         }
-//        else if (title!=null){
-//            result+= " AND " + this.buildLikeQueryString(title,"m.title");;
-//        }
+
 
 
         if (director != null && !director.isEmpty()){
@@ -187,9 +185,7 @@ public class MovieSearchServlet extends HttpServlet {
             args.add(year);
             //first = false;
         }
-//        else if(year!=null){
-//            result += " AND m.year = " + year.toString();
-//        }
+
         //Terminate the statement
         if (usePagination){
             result += MovieListServlet.buildOrderByClause(request,"m","r" ) + " " + MovieListServlet.buildPaginationClause(request);
@@ -250,9 +246,8 @@ public class MovieSearchServlet extends HttpServlet {
         String genre = genreNameAttribute.get(request);
         String character = charAttribute.get(request);
         ArrayList<String> args = new ArrayList<>();
-        //Selecting individual columns and using DISTINCT as a movie can have several genres, causing duplicate data, unlike ratings which has a 1 to 1 relationship with movies
-        String result = "SELECT DISTINCT m.id,m.title,m.year,m.director,r.rating,r.numVotes FROM movies AS m, ratings AS r, genres_in_movies AS gim , genres AS g  WHERE (gim.genreId = g.id) AND (gim.movieId = m.id) AND (r.movieId = m.id) ";
-        result = selectClause + sqlBrowseFromWhereClause;
+
+        String result = selectClause + sqlBrowseFromWhereClause;
 
         if (genre!=null && !genre.isEmpty()){
             result += " AND (g.name = ?) ";

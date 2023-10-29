@@ -1,0 +1,12 @@
+#login_container{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: auto;
+}
+label{
+    color: blue;
+    align-self: center;
+    text-align: center;
+    align-content: center;
+}
