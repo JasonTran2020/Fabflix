@@ -6,6 +6,8 @@ if (index!=-1){
     parameters = url.slice(index)
 }
 
+jQuery("#genreid").val(getParameterByName("genre"))
+
 buildSortingAndPaginationForm("#sorting-form");
 buildPaginationLinks("#paginator", "p")
 

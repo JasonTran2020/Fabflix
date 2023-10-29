@@ -18,8 +18,10 @@
 <div style="clear: both;"></div> <!-- This is added to clear the floats -->
 
 <h1 class="headline-large">Browsing movies</h1>
-<form id="sorting-form" action="movie-twenty-list.html">
-  <!-- Script to build the rest of this form-->
+<form id="sorting-form" action="movie-browse.html">
+  <!-- Script to build the rest of this form. Also hidden fields to maintain existing parameters-->
+  <input id="genreid" name="genre" type="text" value="" hidden="hidden">
+  <input id="browsingid" name="browsing" type="text" value="true" hidden="hidden">
   <input type="submit">
 
 </form>
@@ -53,6 +55,6 @@
 <!-- Necessary utility file for movie-search.js to function -->
 <script src="util-cart-items.js"></script>
 <script src="util-movie-list.js"></script>
-<script src="movie-search.js"></script>
+<script src="movie-browse.js"></script>
 </body>
 </html>
