@@ -1,12 +1,13 @@
 #login_container{
-    display: flex;
+    display: grid;
+    place-items: center;
+
+}
+form{
+    margin: auto;
+    text-align: center;
     justify-content: center;
     align-items: center;
-    width: auto;
+    width: 50%;
 }
-label{
-    color: blue;
-    align-self: center;
-    text-align: center;
-    align-content: center;
-}
+
