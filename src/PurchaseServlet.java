@@ -33,15 +33,17 @@ public class PurchaseServlet extends HttpServlet{
         // get customer id from session
         // movie id from parameter
         // i need to return sale id to js
+        System.out.println("in doPost");
         PrintWriter out = response.getWriter();
         String movieId = request.getParameter("id");
+        int quantity = Integer.parseInt(request.getParameter("quantity"));
         HttpSession session = request.getSession(false);
         User retrievedUser = (User) session.getAttribute("user");
         int retrievedCustomerId = retrievedUser.getUserId();
         String customerIdAsString = String.valueOf(retrievedCustomerId);
         try (Connection conn = dataSource.getConnection()) {
 
-            String get_max_id_query = "SELECT MAX(id) FROM SALES";
+            String get_max_id_query = "SELECT MAX(id) FROM sales";
 
             PreparedStatement statement = conn.prepareStatement(get_max_id_query);
 
@@ -50,17 +52,19 @@ public class PurchaseServlet extends HttpServlet{
             ResultSet resultSet = statement.executeQuery();
             int new_sale_number = 0;
             if (resultSet.next()) {
-                new_sale_number = resultSet.getInt("id");
+                new_sale_number = resultSet.getInt(1);
 
             }
+            System.out.println(new_sale_number);
 
-            String insert_into_sales_query = "INSERT INTO sales(id, customerId, movieId, saleDate)\n" +
-                    "VALUES (?, ? , ? , CURRENT_DATE())\n";
+            String insert_into_sales_query = "INSERT INTO sales(id, customerId, movieId, saleDate, quantity)\n" +
+                    "VALUES (?, ? , ? , CURRENT_DATE(), ?)\n";
             PreparedStatement secondStatement = conn.prepareStatement(insert_into_sales_query);
             secondStatement.setString(1, String.valueOf(new_sale_number + 1));
             secondStatement.setString(2, customerIdAsString);
             secondStatement.setString(3, movieId);
-            ResultSet resultSet2 = secondStatement.executeQuery(); // don't need resultset after inserting into table
+            secondStatement.setInt(4, quantity);
+            secondStatement.executeUpdate(); // don't need resultset after inserting into table
             //Close the prepared statements
             // Send the new sale number as a JSON response
             JsonObject jsonObject = new JsonObject();
@@ -70,7 +74,6 @@ public class PurchaseServlet extends HttpServlet{
             secondStatement.close();
             statement.close();
             resultSet.close();
-            resultSet2.close();
 
         } catch (Exception e) {
             JsonObject jsonObject = new JsonObject();

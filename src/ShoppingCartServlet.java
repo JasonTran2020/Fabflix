@@ -44,6 +44,7 @@ public class ShoppingCartServlet extends HttpServlet {
 
         // Retrieve parameter id from url request.
         String itemIdsParam = request.getParameter("itemIds");
+        int quantity = Integer.parseInt(request.getParameter("quantity"));
         // The log message can be found in localhost log
         request.getServletContext().log(TAG + "getting ids: " + itemIdsParam);
 
@@ -81,8 +82,12 @@ public class ShoppingCartServlet extends HttpServlet {
                 jsonMovieObject.addProperty("movie_price", resultSet.getString("price"));
 
                 int frequency = itemCountMap.getOrDefault(resultSet.getString("id"), 0);
-                jsonMovieObject.addProperty("movie_frequency", frequency);
-
+                if (quantity == 0) {
+                    jsonMovieObject.addProperty("movie_frequency", frequency);
+                }
+                else {
+                    jsonMovieObject.addProperty("movie_frequency", quantity);
+                }
                 jsonMovieArray.add(jsonMovieObject);
             }
 

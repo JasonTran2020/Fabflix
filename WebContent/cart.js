@@ -155,10 +155,11 @@ function handleIndexServletData(resultData) {
     // have to call other servlet now
     // Send all item IDs in one request
     let itemIds = resultData.previousItems.join(",");
+
     jQuery.ajax({
         dataType: "json",
         method: "GET",
-        url: "api/cart?itemIds=" + encodeURIComponent(itemIds),
+        url: "api/cart?itemIds=" + encodeURIComponent(itemIds) + "&quantity=0",
 
         success:  (cartResult) => handleResult(cartResult)
     });
