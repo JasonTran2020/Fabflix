@@ -72,8 +72,8 @@ function handleResult(resultData) {
         rowHTML += "<button class='increment' data-movieid='" + movieId + "'>+</button>";
         rowHTML += "</td>";
         rowHTML += "<th><button type='button' class='btn btn-outline-primary delete' data-movieid='" + movieId + "'>Delete</button></th>";
-        rowHTML += "<th class='headline-large'>" + moviePrice + "</th>";
-        rowHTML += "<th class='headline-large individualTotal'>" + totalPrice + "</th>";
+        rowHTML += "<th class='headline-large'>" + "$" + moviePrice + "</th>";
+        rowHTML += "<th class='headline-large individualTotal'>"  + totalPrice + "</th>";
         rowHTML += "<div/>"
         rowHTML += "</tr>";
 

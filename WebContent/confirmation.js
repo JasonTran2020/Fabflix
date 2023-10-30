@@ -38,8 +38,8 @@ function fillRowHTML(saleNum, dataItem) {
     rowHTML += "<th class='headline-large'>" + saleIdNum + "</th>";
     rowHTML += "<th class='headline-large'>" + movieTitle + "</th>";
     rowHTML += "<th class='headline-large'>" + movieFrequency + "</th>";
-    rowHTML += "<th class='headline-large'>" + moviePrice + "</th>";
-    rowHTML += "<th class='headline-large'>" + totalPrice + "</th>";
+    rowHTML += "<th class='headline-large'>"  + "$" + moviePrice + "</th>";
+    rowHTML += "<th class='headline-large'>"  + "$" + totalPrice + "</th>";
     rowHTML += "</tr>";
 
 
@@ -109,5 +109,13 @@ jQuery.ajax({
     method: "GET",// Setting request method
     url: "api/index",
     success: (resultData) => makeSequentialAjaxCalls(resultData) // Setting callback function to handle data returned successfully by the SingleStarServlet
+});
+
+//To create the correct back to movies link that saves all parameters from before
+jQuery.ajax({
+    dataType: "json", // Setting return data type
+    method: "GET", // Setting request method
+    url: "api/remember-movie-parameters" ,
+    success: (resultData) => handleJumpBackLink("#backlink",resultData) // Setting callback function to handle data returned successfully by the StarsServlet
 });
 
