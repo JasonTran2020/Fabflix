@@ -60,6 +60,7 @@ public class LoginFilter implements Filter {
         allowedURIs.add("api/login");
         allowedURIs.add("general-css-files/tokens.css");
         allowedURIs.add("base.css");
+        allowedURIs.add("login.css");
         allowedURIs.add("general-css-files/typography.module.css");
     }
 
