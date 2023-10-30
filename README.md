@@ -20,7 +20,7 @@ Demo video URL: https://youtu.be/hW1ehcmigZw
 ---------
 Project 2:
 ---------
-Demo video URL: TBD
+Demo video URL: https://youtu.be/QAH5yKksrwk
 
 Jason Tran's work:
 * Implemented Browsing/Searching (Task 2)
