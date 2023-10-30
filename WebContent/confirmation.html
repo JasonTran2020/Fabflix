@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="general-css-files/tokens.css">
+    <link rel="stylesheet" href="general-css-files/typography.module.css">
+    <link rel="stylesheet" href="base.css">
+    <link rel="stylesheet" href="single-star.css">
+
+    <title>Order Confirmation</title>
+</head>
+<body>
+
+<a href="movie-twenty-list.html">Back to movies</a>
+
+<div style="clear: both;"></div>
+
+<h3 id="confirmation_info">Order Confirmation</h3>
+
+<table id="movie_table" class="table table-striped">
+    <thead>
+    <tr id="table_headline">
+        <th class='headline-large'>Sale ID</th>
+        <th class='headline-large'>Movie Title</th>
+        <th class='headline-large'>Quantity</th>
+        <th class='headline-large'>Price</th>
+        <th class='headline-large'>Total</th>
+    </tr>
+    </thead>
+    <tbody id="order_summary_body"></tbody>
+</table>
+
+<h3>Total Paid: $<span id="overallTotal">0</span></h3>
+
+<h4>Thank you for your purchase!</h4>
+
+<!-- If needed, you can keep the scripts for populating the table data from your JS files -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script src="util-cart-items.js"></script>
+<script src="util-movie-list.js"></script>
+<script src="confirmation.js"></script>
+</body>
+</html>
