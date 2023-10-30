@@ -59,8 +59,10 @@ public class ValidatePaymentServlet extends HttpServlet {
         if (validatePaymentDetails(request, ccId, firstName, lastName, expiryDate)) {
             //recordTransaction(ccId, firstName, lastName); // Record the transaction
             response.setStatus(HttpServletResponse.SC_OK);  // 200 OK
+            out.write("{\"status\":\"success\",\"message\":\"Payment validated successfully.\"}");
         } else {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);  // 500 Internal Server Error
+            out.write("{\"status\":\"error\",\"message\":\"Invalid payment details.\"}");
         }
 
         out.close();

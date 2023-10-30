@@ -164,7 +164,7 @@ function handleIndexServletData(resultData) {
     });
 
 }
-// Makes the HTTP GET request and registers on success callback function handleResult
+
 jQuery.ajax({
     dataType: "json",  // Setting return data type
     method: "GET",// Setting request method
