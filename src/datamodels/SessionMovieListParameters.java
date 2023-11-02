@@ -41,10 +41,11 @@ public class SessionMovieListParameters {
                 if (first){
                     first = false;
                     result = "?";
-                    result += currentRequest.name + "=" + currentArgument;
+                    //URL spaces should be replaced with +
+                    result += currentRequest.name + "=" + currentArgument.replace(' ','+');
                 }
                 else{
-                    result += "&" + currentRequest.name + "=" + currentArgument;
+                    result += "&" + currentRequest.name + "=" + currentArgument.replace(' ','+');
                 }
             }
         }

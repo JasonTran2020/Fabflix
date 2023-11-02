@@ -221,22 +221,26 @@ public class MovieSearchServlet extends HttpServlet {
         //This function will take a string in, split it into words, and create a LIKE sql clause in parentheses
         // On MySql8, ILIKE does NOT exist. However
         StringBuilder result = new StringBuilder("( ");
-        boolean first = true;
-        // \s means whitespace, but \ means an escape character, so we need \\s. the + means 1 or more, which is what we want
-        String[] words =argument.split("\\s+");
-        for (String word : words) {
-            if (!first) {
-                result.append(" OR ");
-            }
-            //Appending a "?" instead of the argument directly for safety
-            result.append(" ").append(columnName).append(" LIKE ").append("?").append(" ");
-            //So that next iteration there is OR
-            first = false;
-            //Store the argument separately and also add the wildcard characters here, rather than when setting the arguments in the prepared statement
-            // (because year doesn't deserve wildcards)
-            args.add("%" + word + "%");
-
-        }
+        //The way the requested by the TAs
+        result.append(" ").append(columnName).append(" LIKE ").append("?").append(" ");
+        args.add("%"+argument+"%");
+        //The older way that gave more results (albeit not as relevant)
+//        boolean first = true;
+//        // \s means whitespace, but \ means an escape character, so we need \\s. the + means 1 or more, which is what we want
+//        String[] words =argument.split("\\s+");
+//        for (String word : words) {
+//            if (!first) {
+//                result.append(" OR ");
+//            }
+//            //Appending a "?" instead of the argument directly for safety
+//            result.append(" ").append(columnName).append(" LIKE ").append("?").append(" ");
+//            //So that next iteration there is OR
+//            first = false;
+//            //Store the argument separately and also add the wildcard characters here, rather than when setting the arguments in the prepared statement
+//            // (because year doesn't deserve wildcards)
+//            args.add("%" + word + "%");
+//
+//        }
         result.append(")");
         return result.toString();
 
