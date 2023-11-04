@@ -4,6 +4,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.jasypt.util.password.StrongPasswordEncryptor;
 
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -13,6 +14,7 @@ import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 
 @WebServlet(name = "LoginServlet", urlPatterns = "/api/login")
 public class LoginServlet extends HttpServlet {
@@ -44,9 +46,7 @@ public class LoginServlet extends HttpServlet {
             response.getWriter().write(responseJsonObject.toString());
             return;
         }
-        /* This example only allows username/password to be test/test
-        /  in the real project, you should talk to the database to verify username/password
-        */
+
         try (Connection conn = dataSource.getConnection()) {
             String login_info_query = "SELECT c.*, cr.expiration \n" +
                     "FROM customers c \n" +
@@ -69,7 +69,7 @@ public class LoginServlet extends HttpServlet {
                 String dbExpiryDate = resultSet.getString("expiration");
                 String dbAddress = resultSet.getString("address");
                 // Assuming passwords are stored as plaintext for this example, but hashing should be used.
-                if (username.equals(dbEmail) && password.equals(dbPassword)) {
+                if (username.equals(dbEmail) && verifyEncryptedPassword(password,dbPassword)) {
                     request.getSession().setAttribute("user", new User(dbEmail, dbId, dbFirstName, dbLastName, dbCcId, dbExpiryDate, dbAddress));
                     responseJsonObject.addProperty("status", "success");
                     responseJsonObject.addProperty("message", "success");
@@ -94,5 +94,8 @@ public class LoginServlet extends HttpServlet {
         } finally {
             out.close();
         }
+    }
+    protected boolean verifyEncryptedPassword(String inputtedPassword, String dbPassword)  {
+        return new StrongPasswordEncryptor().checkPassword(inputtedPassword, dbPassword);
     }
 }
