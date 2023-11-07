@@ -14,7 +14,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MovieDomParser {
+public class MovieDomParser extends DomParser {
 
     List<Movie> movies = new ArrayList<>();
     Document dom;
@@ -59,46 +59,7 @@ public class MovieDomParser {
         return new Movie(generateRandomMovieId(), title, year, director,genres);
     }
 
-    private String getTextValue(Element element, String tagName) {
-        String textVal = null;
-        NodeList nodeList = element.getElementsByTagName(tagName);
-        //Only take a single value, even if there are multiple
-        //First element might not have text, so keep checking all children until a text is found
-        for (int i = 0; i < nodeList.getLength(); i++){
-            //Apparently text is considered its own node? hence why you need to call getFirstChild.
-            Node currentNode = nodeList.item(i).getFirstChild();
-            if (currentNode !=null){
-                textVal = currentNode.getNodeValue();
-                break;
-            }
 
-        }
-        return textVal;
-    }
-
-    private int getIntValue(Element ele, String tagName) {
-        //Potential exception if value is not a number
-        try{
-            return Integer.parseInt(getTextValue(ele, tagName));
-        }
-        catch (NumberFormatException e){
-            System.out.println("Failed to get integer from the element: " + ele.toString());
-            return -1;
-        }
-
-    }
-
-    private List<String> getTextList(Element element, String tagName) {
-        List<String> textList = new ArrayList<>();
-        NodeList nodeList = element.getElementsByTagName(tagName);
-        for (int i = 0; i < nodeList.getLength(); i++){
-            Node currentNode = nodeList.item(i).getFirstChild();
-            if (currentNode != null){
-                textList.add(currentNode.getNodeValue());
-            }
-        }
-        return textList;
-    }
 
     private String generateRandomMovieId(){
         //TODO figure out how to generate a string for a movie id. Asking MySQL to make one was recommended against as a final solution
