@@ -35,15 +35,23 @@ function submitLoginForm(formSubmitEvent) {
      * event handler when the event is triggered.
      */
     formSubmitEvent.preventDefault();
+    var recaptchaResponse = grecaptcha.getResponse();
+    if(recaptchaResponse.length === 0) {
+        // ReCAPTCHA not solved; show error message
+        $("#login_error_message").text("Please verify that you are not a robot.");
 
-    $.ajax(
-        "api/login", {
-            method: "POST",
-            // Serialize the login form to the data sent by POST request
-            data: login_form.serialize(),
-            success: handleLoginResult
-        }
-    );
+    }
+    else {
+        $.ajax(
+            "api/login", {
+                method: "POST",
+                // Serialize the login form to the data sent by POST request
+                data: login_form.serialize(),
+                success: handleLoginResult
+            }
+        );
+    }
+
 }
 
 // Bind the submit action of the form to a handler function
