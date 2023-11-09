@@ -66,12 +66,14 @@ abstract public class DomParser {
 
     protected  void capitalizeStringList(List<String> listOfStrings){
         for (int index = 0 ; index <listOfStrings.size();index++){
-            listOfStrings.set(index,capitalizeString(listOfStrings.get(index)));
+            listOfStrings.set(index,capitalizeAndStripString(listOfStrings.get(index)));
         }
     }
-    protected String capitalizeString(String line){
+    protected String capitalizeAndStripString(String line){
         line = line.toLowerCase();
-        return Character.toUpperCase(line.charAt(0)) + line.substring(1);
+        String result = Character.toUpperCase(line.charAt(0)) + line.substring(1);
+        result = result.strip();
+        return result;
     }
 
 

@@ -41,7 +41,8 @@ public class Movie {
         return allStrings.hashCode();
     }
 
-    public String generateDBIdFromHashCode(){
-        return "tt"+this.hashCode();
+    public String generateDBIdFromHashCode(int offset){
+        //Due to how many movies there are, it is very possible that two completely separate movies can have the same hash value. Offset is meant to counter this.
+        return "tt"+((this.hashCode()+offset)%10000000);
     }
 }
