@@ -24,4 +24,20 @@ public class Movie {
                 "director: " + this.director + ", "+
                 "genres: " + this.genres;
     }
+    @Override
+    public boolean equals(Object o){
+        if (o.getClass() == Movie.class){
+            Movie actual = (Movie) o;
+            //Equality based on title, year, and director. Id or genres are not used
+            return actual.title.equals(this.title) && actual.year==this.year && actual.director.equals(this.director);
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode(){
+        //Hash code is based on the same things used in equals()
+        String allStrings = "" + this.title + this.year + this.director;
+        return allStrings.hashCode();
+    }
 }

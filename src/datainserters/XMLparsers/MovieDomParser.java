@@ -1,5 +1,6 @@
 package datainserters.XMLparsers;
 
+import datamodels.dbitems.Genre;
 import datamodels.dbitems.Movie;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -11,11 +12,14 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class MovieDomParser extends DomParser {
 
     List<Movie> movies = new ArrayList<>();
+    Set<String> genreNames = new HashSet<>();
     Document dom;
 
     private void createDomFromXmlFile(String filePath) {
@@ -40,6 +44,7 @@ public class MovieDomParser extends DomParser {
             Element element = (Element) filmNodeList.item(i);
             Movie movie = parseMovie(element);
             System.out.println(i+1+": " + movie);
+            genreNames.addAll(movie.genres);
             movies.add(movie);
         }
     }
@@ -53,6 +58,8 @@ public class MovieDomParser extends DomParser {
             System.out.println("Failed to get integer from the film: " + title);
         }
         List<String> genres = getTextList(element,"cat");
+        capitalizeStringList(genres);
+
 
         // create a new Employee with the value read from the xml nodes
         return new Movie(generateRandomMovieId(), title, year, director,genres);
@@ -67,6 +74,8 @@ public class MovieDomParser extends DomParser {
 
     private void printAllDataStatistics(){
         System.out.println("Total parsed " + movies.size() + " movies");
+        System.out.println("Total genres found: " + genreNames.size());
+        System.out.println("All genres found: " + genreNames);
     }
 
     //This is quite slow and will use a lot of RAM if the xml file is big, since DOM loads the entire tree, compared to SAX which goes one at a time and uses events

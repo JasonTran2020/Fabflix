@@ -42,8 +42,13 @@ public class MovieInserter {
         }
     }
 
-    protected void insertSingleMovieIntoDB(Movie movie, Connection conn){
+    protected void insertSingleMovieIntoDB(Movie movie, PreparedStatement insertStatement) throws SQLException {
+        insertStatement.setString(1, movie.movieId);
+        insertStatement.setString(2, movie.title);
+        insertStatement.setInt(3,movie.year);
+        insertStatement.setString(4,movie.director);
 
+        insertStatement.executeUpdate();
     }
 
     public static void main(String[] args) {
