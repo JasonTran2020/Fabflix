@@ -84,6 +84,10 @@ public class MovieDomParser extends DomParser {
         parseAllMovies();
         return movies;
     }
+    //Can only be called after getMoviesFromXmlFile
+    public Set<String> getParsedGenres(){
+        return genreNames;
+    }
 
     //For testing. Another class should be used to use MovieDomParser and insert into the mysql database
     public static void main(String[] args) {
