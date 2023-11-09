@@ -10,11 +10,8 @@ import java.util.ArrayList;
 /**
  * Servlet Filter implementation class LoginFilter
  */
-@WebFilter(filterName = "LoginFilter", urlPatterns = "/*")
-public class LoginFilter implements Filter {
-
-    private static final long serialVersionUID = 8L;
-    public static final String TAG = "LoginFilter";
+@WebFilter(filterName = "EmployeeLoginFilter", urlPatterns = "/_dashboard/*")
+public class EmployeeLoginFilter implements Filter {
     private DataSource dataSource;
 
 
@@ -28,7 +25,7 @@ public class LoginFilter implements Filter {
         HttpServletRequest httpRequest = (HttpServletRequest) request;
         HttpServletResponse httpResponse = (HttpServletResponse) response;
 
-        System.out.println("LoginFilter: " + httpRequest.getRequestURI());
+        System.out.println("EmployeeLoginFilter: " + httpRequest.getRequestURI());
 
         // Check if this URL is allowed to access without logging in
         if (this.isUrlAllowedWithoutLogin(httpRequest.getRequestURI())) {
@@ -38,8 +35,8 @@ public class LoginFilter implements Filter {
         }
 
         // Redirect to login page if the "user" attribute doesn't exist in session
-        if (httpRequest.getSession().getAttribute("user") == null) {
-            httpResponse.sendRedirect("login.html");
+        if (httpRequest.getSession().getAttribute("employee") == null) {
+            httpResponse.sendRedirect("/_dashboard/login.html");
         } else {
             chain.doFilter(request, response);
         }
@@ -51,10 +48,9 @@ public class LoginFilter implements Filter {
          Always allow your own login related requests(html, js, servlet, etc..)
          You might also want to allow some CSS files, etc..
          */
-        if (requestURI.startsWith("/project1/_dashboard/") || allowedURIs.stream().anyMatch(requestURI.toLowerCase()::endsWith)) {
-            return true;
-        }
-        return false;
+        requestURI = requestURI.toLowerCase();
+
+        return allowedURIs.stream().anyMatch(requestURI.toLowerCase()::endsWith) || requestURI.endsWith("api/login");
     }
 
     public void init(FilterConfig fConfig) {
@@ -65,10 +61,13 @@ public class LoginFilter implements Filter {
         allowedURIs.add("base.css");
         allowedURIs.add("login.css");
         allowedURIs.add("general-css-files/typography.module.css");
+        allowedURIs.add("_dashboard/login.html");
+        allowedURIs.add("_dashboard/login.js");
+        allowedURIs.add("_dashboard/login.css");
+
     }
 
     public void destroy() {
         // ignored.
     }
-
 }
