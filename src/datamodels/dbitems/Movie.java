@@ -40,4 +40,8 @@ public class Movie {
         String allStrings = "" + this.title + this.year + this.director;
         return allStrings.hashCode();
     }
+
+    public String generateDBIdFromHashCode(){
+        return "tt"+this.hashCode();
+    }
 }

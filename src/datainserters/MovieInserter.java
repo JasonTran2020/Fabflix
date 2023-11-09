@@ -18,6 +18,7 @@ public class MovieInserter {
     protected Map<String,String> genreMappings;
     protected static final double minSimilarityPercent = 0.6;
     private String sqlInsertMovieClause = "INSERT INTO movies VALUES(?,?,?,?)";
+    private String sqlInsertGenreClause = "INSERT INTO genres(Col2) VALUES(?)";
     private String sqlGetAllGenres = "SELECT * FROM genres g";
     MovieInserter(){
         //As a standalone class not part of the web application, we can't use InitialContext (without prior set up)
@@ -51,6 +52,10 @@ public class MovieInserter {
         insertStatement.setInt(3,movie.year);
         insertStatement.setString(4,movie.director);
 
+        insertStatement.executeUpdate();
+    }
+    protected void insertSingleGenreIntoDb(String genreName, PreparedStatement insertStatement) throws SQLException {
+        insertStatement.setString(1,genreName);
         insertStatement.executeUpdate();
     }
     protected void testGenreGrouping(){

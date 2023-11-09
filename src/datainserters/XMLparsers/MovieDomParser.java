@@ -78,6 +78,21 @@ public class MovieDomParser extends DomParser {
         System.out.println("All genres found: " + genreNames);
     }
 
+    public static void verifyMovie(Movie movie) throws MovieParseError{
+        boolean failed = false;
+        if (movie.title.isEmpty()){
+            System.out.println("Error parsing movie: Movie doesn't have a title. Not inserting movie.");
+            throw new MovieParseError();
+        }
+        else if (movie.director.isEmpty()){
+            System.out.println("Error parsing movie: Movie doesn't have a director. Setting directory as Unknown.");
+            movie.director = "Unknown";
+        }
+        else if (movie.year==-1){
+            System.out.println("Error parsing movie: Failed to parse year. Setting date as -1.");
+        }
+
+    }
     //This is quite slow and will use a lot of RAM if the xml file is big, since DOM loads the entire tree, compared to SAX which goes one at a time and uses events
     public List<Movie> getMoviesFromXmlFile(String filePath){
         createDomFromXmlFile(filePath);
@@ -89,6 +104,9 @@ public class MovieDomParser extends DomParser {
         return genreNames;
     }
 
+    public static class MovieParseError extends RuntimeException{
+
+    }
     //For testing. Another class should be used to use MovieDomParser and insert into the mysql database
     public static void main(String[] args) {
 
