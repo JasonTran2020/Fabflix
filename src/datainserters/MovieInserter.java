@@ -25,6 +25,7 @@ public class MovieInserter {
     private static String sqlInsertGenreClause = "INSERT INTO genres VALUES(NULL,?)";
     private static String sqlGetAllGenres = "SELECT * FROM genres g";
     private static String sqlInsertGenreInMovieClause = "INSERT INTO genres_in_movies VALUES(?,?)";
+    private static String sqlInsertDefaultRatingInMovieClause = "INSERT INTO ratings VALUES(?,?,?)";
     MovieInserter(){
         //As a standalone class not part of the web application, we can't use InitialContext (without prior set up)
         //Instead, manually pass in the parameters to connect to the db. Not preferable due to have duplicate locations holding their own user and password strings
@@ -82,7 +83,7 @@ public class MovieInserter {
         //Doesn't check against duplicate movies currently in DB
         //Also adds entries to genres in movies
         PreparedStatement statement = connection.prepareStatement(sqlInsertMovieClause);
-        int count = 1
+        int count = 1;
         for (Movie movie :movies){
             int offset = 0;
             while(true){
@@ -92,6 +93,7 @@ public class MovieInserter {
                     System.out.println(count+". Inserting movie into DB: " + movie);
                     insertSingleMovieIntoDB(movie,statement);
                     insertGenresInMovieIntoDb(connection,movie,genreDBIdMappings);
+                    insertRatingIntoDb(connection,movie);
                     count+=1;
                     break;
                 }
@@ -148,6 +150,21 @@ public class MovieInserter {
                 }
             }
 
+        }
+        statement.close();
+    }
+    protected void insertRatingIntoDb(Connection connection, Movie movie) throws SQLException {
+        PreparedStatement statement = connection.prepareStatement(sqlInsertDefaultRatingInMovieClause);
+        statement.setString(1,movie.movieId);
+        statement.setFloat(2,0);
+        statement.setInt(3,0);
+        try{
+            statement.executeUpdate();
+        }
+        catch (SQLException e){
+            if (e.getErrorCode() == MysqlErrorNumbers.ER_DUP_ENTRY){
+                System.out.println("Duplicate rating. Ignoring current insertion");
+            }
         }
         statement.close();
     }

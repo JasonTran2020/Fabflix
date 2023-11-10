@@ -20,19 +20,6 @@ public class MovieDomParser extends DomParser {
 
     Set<Movie> movies = new HashSet<>();
     Set<String> genreNames = new HashSet<>();
-    Document dom;
-
-    private void createDomFromXmlFile(String filePath) {
-        DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
-        try {
-            DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
-            // parse using builder to get DOM representation of the XML file
-            dom = documentBuilder.parse(filePath);
-        } catch (ParserConfigurationException | SAXException | IOException error) {
-            error.printStackTrace();
-        }
-    }
-
     private void parseAllMovies(){
         // get the document root Element
         Element documentElement = dom.getDocumentElement();
