@@ -165,6 +165,9 @@ public class MovieInserter {
             if (e.getErrorCode() == MysqlErrorNumbers.ER_DUP_ENTRY){
                 System.out.println("Duplicate rating. Ignoring current insertion");
             }
+            else{
+                System.out.println(e);
+            }
         }
         statement.close();
     }
