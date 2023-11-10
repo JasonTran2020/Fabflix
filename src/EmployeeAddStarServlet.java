@@ -34,8 +34,8 @@ public class EmployeeAddStarServlet extends HttpServlet {
         String birth_year = request.getParameter("birth_year");
 
         JsonObject responseJsonObject = new JsonObject();
-
-        if (star_name.equals("")) {
+        PrintWriter out = response.getWriter();
+        if (star_name == null || star_name.trim().isEmpty()) {
             responseJsonObject.addProperty("status", "fail");
             responseJsonObject.addProperty("message", "Missing star name");
             response.getWriter().write(responseJsonObject.toString());
@@ -48,5 +48,50 @@ public class EmployeeAddStarServlet extends HttpServlet {
         // info, or original resultset will do it for me
         // either way i need to send info back
 
+        try (Connection connection = dataSource.getConnection()) {
+            String newId = "";
+            PreparedStatement getMaxId = connection.prepareStatement("SELECT max(id) AS MAX FROM stars");
+            ResultSet resultSet = getMaxId.executeQuery();
+            String id = "";
+            if (resultSet.next()) {
+                String maxId = resultSet.getString("max");
+                String prefix = maxId.substring(0, 2);
+                String numberPart = maxId.substring(2);
+                int num = Integer.parseInt(numberPart);
+                num++;
+                String incrementedNumberPart = String.format("%07d", num);
+                newId = prefix + incrementedNumberPart;
+
+            }
+
+            PreparedStatement insertNewStar = connection.prepareStatement("INSERT INTO stars (id, name, birthYear) VALUES (?, ?, ?)");
+            insertNewStar.setString(1, newId);
+            insertNewStar.setString(2, star_name);
+
+            if (birth_year == null || birth_year.trim().isEmpty()) {
+                insertNewStar.setNull(3, java.sql.Types.INTEGER);
+            } else {
+                insertNewStar.setInt(3, Integer.parseInt(birth_year));
+            }
+
+            insertNewStar.executeUpdate();
+
+            responseJsonObject.addProperty("status", "success");
+            responseJsonObject.addProperty("message", "Success! New star with id " + newId + " has been added to the database.");
+            out.write(responseJsonObject.toString());
+            insertNewStar.close();
+            connection.close();
+        }
+
+        catch (Exception e) {
+            JsonObject jsonObject = new JsonObject();
+            jsonObject.addProperty("errorMessage", e.getMessage());
+            out.write(jsonObject.toString());
+
+            response.setStatus(500);
+
+        } finally {
+            out.close();
+        }
     }
 }

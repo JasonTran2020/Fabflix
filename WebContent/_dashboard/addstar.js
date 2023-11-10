@@ -35,13 +35,15 @@ function handleStarResult(resultDataString) {
     console.log(resultDataJson["status"]);
     // TODO - the AddStar Servlet with the messages - check if it actually inserted into db too w/ customer view
     if (resultDataJson["status"] === "success") {
-        // this block will be ran even if submit info is incorrect
+        //
         console.log("show success message");
         console.log(resultDataJson["message"]);
+        $("#add_star_message").text(resultDataJson["message"]);
+        //
         // give a success message with the info
     } else {
         // If login fails, the web page will display
-        // error messages on <div> with id "login_error_message"
+
         console.log("show error message");
         console.log(resultDataJson["message"]);
         $("#add_star_message").text(resultDataJson["message"]);

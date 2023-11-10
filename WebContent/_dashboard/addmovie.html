@@ -3,8 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <title>Add a movie</title>
+    <!-- Link to CSS files -->
+    <link rel="stylesheet" href="../general-css-files/tokens.css">
+    <link rel="stylesheet" href="../general-css-files/typography.module.css">
+    <link rel="stylesheet" href="../base.css">
+    <!-- Create a separate CSS file for this page if needed -->
+    <link rel="stylesheet" href="../login.css">
 </head>
 <body>
+<nav id="main-nav">
+    <a href="addmovie.html">Add a movie</a>
+    <a href="addstar.html">Add a star</a>
+    <a href="../home.html">Customer View</a>
+
+</nav>
+    <h2>Add a Movie to the Database</h2>
+    <div id="add_movie_container">
+        <form id="add_star_form" method="post">
+            <label for="star_name"><b>Star Name</b></label>
+            <input id="star_name" name="star_name" placeholder="Enter name" type="text" required>
+            <br>
+            <label for="birth_year"><b>Birth Year</b></label>
+            <input id="birth_year" name="birth_year" placeholder="Enter year (optional)" type="number">
+            <br>
+            <input type="submit" value="Add Star">
+            <div id="add_star_message"></div>
+        </form>
+    </div>
+
+    <!-- Include jQuery -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+    <!-- Include your JavaScript file that handles the form submission -->
+    <script src="./addstar.js"></script>
 
 </body>
 </html>
