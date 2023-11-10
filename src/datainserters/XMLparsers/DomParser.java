@@ -1,9 +1,15 @@
 package datainserters.XMLparsers;
 
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
@@ -12,6 +18,17 @@ import java.util.List;
 
 //Serves as the base class for the other parsers, providing general purpose functions that all parsers will use
 abstract public class DomParser {
+    Document dom;
+    protected void createDomFromXmlFile(String filePath) {
+        DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
+        try {
+            DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
+            // parse using builder to get DOM representation of the XML file
+            dom = documentBuilder.parse(filePath);
+        } catch (ParserConfigurationException | SAXException | IOException error) {
+            error.printStackTrace();
+        }
+    }
     protected String getTextValue(Element element, String tagName) {
         String textVal = null;
         NodeList nodeList = element.getElementsByTagName(tagName);
@@ -38,6 +55,22 @@ abstract public class DomParser {
             return -1;
         }
 
+    }
+    protected int getYearValue(Element ele, String tagName){
+        //Expects at least 4 digits. Ignores the rest. Created due to some actors having a birthyear format like 1990+.
+        // Clearly the year is 1990, but the + causes a parsing error in getIntValue
+        try{
+            String yearAsString = getTextValue(ele,tagName);
+            if (yearAsString!=null && yearAsString.length()>=4){
+                yearAsString = yearAsString.substring(0,4);
+                return Integer.parseInt(yearAsString);
+            }
+            return -1;
+        }
+        catch (NumberFormatException e){
+            //System.out.println("Failed to get integer from the element: " + ele.toString());
+            return -1;
+        }
     }
 
     protected List<String> getTextList(Element element, String tagName) {
@@ -66,12 +99,14 @@ abstract public class DomParser {
 
     protected  void capitalizeStringList(List<String> listOfStrings){
         for (int index = 0 ; index <listOfStrings.size();index++){
-            listOfStrings.set(index,capitalizeString(listOfStrings.get(index)));
+            listOfStrings.set(index,capitalizeAndStripString(listOfStrings.get(index)));
         }
     }
-    protected String capitalizeString(String line){
+    protected String capitalizeAndStripString(String line){
         line = line.toLowerCase();
-        return Character.toUpperCase(line.charAt(0)) + line.substring(1);
+        String result = Character.toUpperCase(line.charAt(0)) + line.substring(1);
+        result = result.strip();
+        return result;
     }
 
 

@@ -18,21 +18,8 @@ import java.util.Set;
 
 public class MovieDomParser extends DomParser {
 
-    List<Movie> movies = new ArrayList<>();
+    Set<Movie> movies = new HashSet<>();
     Set<String> genreNames = new HashSet<>();
-    Document dom;
-
-    private void createDomFromXmlFile(String filePath) {
-        DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
-        try {
-            DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
-            // parse using builder to get DOM representation of the XML file
-            dom = documentBuilder.parse(filePath);
-        } catch (ParserConfigurationException | SAXException | IOException error) {
-            error.printStackTrace();
-        }
-    }
-
     private void parseAllMovies(){
         // get the document root Element
         Element documentElement = dom.getDocumentElement();
@@ -43,9 +30,16 @@ public class MovieDomParser extends DomParser {
         for (int i = 0; i < filmNodeList.getLength() ; i++) {
             Element element = (Element) filmNodeList.item(i);
             Movie movie = parseMovie(element);
-            System.out.println(i+1+": " + movie);
-            genreNames.addAll(movie.genres);
-            movies.add(movie);
+            try{
+                verifyMovie(movie);
+                //System.out.println(i+1+": " + movie);
+                genreNames.addAll(movie.genres);
+                movies.add(movie);
+            }
+            catch (MovieParseError e){
+
+            }
+
         }
     }
 
@@ -54,9 +48,6 @@ public class MovieDomParser extends DomParser {
         String title = getTextValue(element, "t");
         String director = getTextValue(element, "dirn");
         int year = getIntValue(element, "year");
-        if (year == -1){
-            System.out.println("Failed to get integer from the film: " + title);
-        }
         List<String> genres = getTextList(element,"cat");
         capitalizeStringList(genres);
 
@@ -80,11 +71,11 @@ public class MovieDomParser extends DomParser {
 
     public static void verifyMovie(Movie movie) throws MovieParseError{
         boolean failed = false;
-        if (movie.title.isEmpty()){
+        if (movie.title==null || movie.title.isEmpty()){
             System.out.println("Error parsing movie: Movie doesn't have a title. Not inserting movie.");
             throw new MovieParseError();
         }
-        else if (movie.director.isEmpty()){
+        else if (movie.director == null || movie.director.isEmpty()){
             System.out.println("Error parsing movie: Movie doesn't have a director. Setting directory as Unknown.");
             movie.director = "Unknown";
         }
@@ -94,15 +85,15 @@ public class MovieDomParser extends DomParser {
 
     }
     //This is quite slow and will use a lot of RAM if the xml file is big, since DOM loads the entire tree, compared to SAX which goes one at a time and uses events
-    public List<Movie> getMoviesFromXmlFile(String filePath){
+    public void executeMoviesParsingFromXmlFile(String filePath){
         createDomFromXmlFile(filePath);
         parseAllMovies();
-        return movies;
     }
     //Can only be called after getMoviesFromXmlFile
     public Set<String> getParsedGenres(){
         return genreNames;
     }
+    public Set<Movie> getMovies(){return movies;}
 
     public static class MovieParseError extends RuntimeException{
 

@@ -1,8 +1,10 @@
 package datainserters;
 
+import com.mysql.cj.exceptions.MysqlErrorNumbers;
 import com.mysql.cj.jdbc.MysqlDataSource;
 import datainserters.XMLparsers.DomParser;
 import datainserters.XMLparsers.MovieDomParser;
+import datamodels.dbitems.Genre;
 import datamodels.dbitems.Movie;
 
 import javax.naming.InitialContext;
@@ -15,11 +17,15 @@ import java.util.*;
 public class MovieInserter {
     private DataSource dataSource;
     protected SortedSet<String> existingGenresSet;
+    protected SortedSet<String> allGenresSet;
     protected Map<String,String> genreMappings;
+
     protected static final double minSimilarityPercent = 0.6;
-    private String sqlInsertMovieClause = "INSERT INTO movies VALUES(?,?,?,?)";
-    private String sqlInsertGenreClause = "INSERT INTO genres(Col2) VALUES(?)";
-    private String sqlGetAllGenres = "SELECT * FROM genres g";
+    private static String sqlInsertMovieClause = "INSERT INTO movies VALUES(?,?,?,?,10)";
+    private static String sqlInsertGenreClause = "INSERT INTO genres VALUES(NULL,?)";
+    private static String sqlGetAllGenres = "SELECT * FROM genres g";
+    private static String sqlInsertGenreInMovieClause = "INSERT INTO genres_in_movies VALUES(?,?)";
+    private static String sqlInsertDefaultRatingInMovieClause = "INSERT INTO ratings VALUES(?,?,?)";
     MovieInserter(){
         //As a standalone class not part of the web application, we can't use InitialContext (without prior set up)
         //Instead, manually pass in the parameters to connect to the db. Not preferable due to have duplicate locations holding their own user and password strings
@@ -30,6 +36,23 @@ public class MovieInserter {
 
         dataSource = mysqlDataSource;
 
+    }
+
+    public void executeDBUpdateFromXML(String filePath){
+        //Inserts genres, then movies, then genres in movies in that order
+        try (Connection connection = dataSource.getConnection()){
+            MovieDomParser movieDomParser = new MovieDomParser();
+            movieDomParser.executeMoviesParsingFromXmlFile(filePath);
+            Set<Movie> movies = movieDomParser.getMovies();
+            Set<String> parsedGenres = movieDomParser.getParsedGenres();
+
+            setupExistingGenresAndGroupGenresTogether(parsedGenres,connection);
+            insertNewGenresIntoDb(connection);
+            insertMoviesIntoDb(movies,getExistingGenresAndIdFromDb(connection),connection);
+
+        } catch (SQLException e){
+            System.out.println(e.toString());
+        }
     }
 
     public void testConnection(){
@@ -46,6 +69,7 @@ public class MovieInserter {
         }
     }
 
+
     protected void insertSingleMovieIntoDB(Movie movie, PreparedStatement insertStatement) throws SQLException {
         insertStatement.setString(1, movie.movieId);
         insertStatement.setString(2, movie.title);
@@ -54,15 +78,101 @@ public class MovieInserter {
 
         insertStatement.executeUpdate();
     }
+
+    protected void insertMoviesIntoDb(Set<Movie> movies,Map<String,Integer> genreDBIdMappings, Connection connection) throws SQLException {
+        //Doesn't check against duplicate movies currently in DB
+        //Also adds entries to genres in movies
+        PreparedStatement statement = connection.prepareStatement(sqlInsertMovieClause);
+        int count = 1;
+        for (Movie movie :movies){
+            int offset = 0;
+            while(true){
+                //Try catch to handle duplicate primary keys
+                try{
+                    movie.movieId = movie.generateDBIdFromHashCode(offset);
+                    System.out.println(count+". Inserting movie into DB: " + movie);
+                    insertSingleMovieIntoDB(movie,statement);
+                    insertGenresInMovieIntoDb(connection,movie,genreDBIdMappings);
+                    insertRatingIntoDb(connection,movie);
+                    count+=1;
+                    break;
+                }
+                catch (SQLException e){
+                    if (e.getErrorCode()==MysqlErrorNumbers.ER_DUP_ENTRY){
+                        System.out.println("Duplicate key of "+movie.movieId+". Attempting to make new primary key");
+                        offset+=1;
+                    }
+                    else{
+                        System.out.println(e);
+                        throw e;
+                    }
+                }
+            }
+
+        }
+
+        statement.close();
+    }
     protected void insertSingleGenreIntoDb(String genreName, PreparedStatement insertStatement) throws SQLException {
         insertStatement.setString(1,genreName);
         insertStatement.executeUpdate();
+    }
+
+    protected void insertNewGenresIntoDb(Connection connection) throws SQLException {
+        PreparedStatement statement = connection.prepareStatement(sqlInsertGenreClause);
+        for (Map.Entry<String, String> entry : genreMappings.entrySet()) {
+            //Only insert genre if it isn't in the DB
+            if (!existingGenresSet.contains(entry.getValue())){
+                insertSingleGenreIntoDb(entry.getValue(),statement);
+                //After inserting, also add it to the existingGenresSet so we don't add it again
+                existingGenresSet.add(entry.getValue());
+            }
+        }
+    }
+    protected void insertGenresInMovieIntoDb(Connection connection, Movie movie, Map<String, Integer> genreDBIdMappings ) throws SQLException {
+        PreparedStatement statement = connection.prepareStatement(sqlInsertGenreInMovieClause);
+        for (String genreName: movie.genres){
+            //Needed due to grouping certain genres together
+            String actualGenreName = genreMappings.get(genreName);
+            int genreDbId = genreDBIdMappings.get(actualGenreName);
+            statement.setInt(1,genreDbId);
+            statement.setString(2,movie.movieId);
+            try{
+                statement.executeUpdate();
+            }
+            catch (SQLException e){
+                //Some movies in the xml have duplicate genres. Handle it here, do not let it populate up
+                if (e.getErrorCode() == MysqlErrorNumbers.ER_DUP_ENTRY){
+                    System.out.println("Duplicate genre of "+genreName+" for the movie "+movie.movieId+". No point in have duplicate genre in movies. Ignoring and continuing");
+                }
+                else{
+                    System.out.println("Ran into this SQL exception when adding "+genreName+" to the movie "+movie.movieId+": "+e+".\n Ignoring and moving on");
+                }
+            }
+
+        }
+        statement.close();
+    }
+    protected void insertRatingIntoDb(Connection connection, Movie movie) throws SQLException {
+        PreparedStatement statement = connection.prepareStatement(sqlInsertDefaultRatingInMovieClause);
+        statement.setString(1,movie.movieId);
+        statement.setFloat(2,0);
+        statement.setInt(3,0);
+        try{
+            statement.executeUpdate();
+        }
+        catch (SQLException e){
+            if (e.getErrorCode() == MysqlErrorNumbers.ER_DUP_ENTRY){
+                System.out.println("Duplicate rating. Ignoring current insertion");
+            }
+        }
+        statement.close();
     }
     protected void testGenreGrouping(){
         try {
             Connection connection = dataSource.getConnection();
             MovieDomParser movieDomParser = new MovieDomParser();
-            movieDomParser.getMoviesFromXmlFile("F:\\CS122BProjectLogs\\xml crap\\stanford-movies\\mains243.xml");
+            movieDomParser.executeMoviesParsingFromXmlFile("F:\\CS122BProjectLogs\\xml crap\\stanford-movies\\mains243.xml");
             setupExistingGenresAndGroupGenresTogether(movieDomParser.getParsedGenres(),connection);
             for (Map.Entry<String, String> entry : genreMappings.entrySet()) {
                 if (!entry.getKey().equals(entry.getValue()))
@@ -80,16 +190,32 @@ public class MovieInserter {
         while (rs.next()){
             result.add(rs.getString("name"));
         }
+        statement.close();
+        rs.close();
+        return result;
+    }
 
+    protected Map<String,Integer> getExistingGenresAndIdFromDb(Connection conn) throws SQLException{
+        Statement statement = conn.createStatement();
+        ResultSet rs = statement.executeQuery(sqlGetAllGenres);
+        //Decision based on this https://stackoverflow.com/questions/18564744/fastest-way-to-find-strings-in-string-collection-that-begin-with-certain-chars
+        Map<String,Integer> result = new HashMap<>();
+        while (rs.next()){
+            result.put(rs.getString("name"),rs.getInt("id"));
+        }
+        statement.close();
+        rs.close();
         return result;
     }
 
     protected void setupExistingGenresAndGroupGenresTogether(Set<String> parsedGenres, Connection conn) throws SQLException {
         existingGenresSet = getExistingGenresFromDb(conn);
+        allGenresSet = new TreeSet<>();
+        allGenresSet.addAll(existingGenresSet);
         genreMappings = new HashMap<>();
         //Existing genres map to themselves, not to new genres added from a data source
         existingGenresSet.forEach((genre) -> genreMappings.put(genre,genre));
-        parsedGenres.forEach((genre) -> groupGenreOrAddNew(existingGenresSet,genreMappings,genre));
+        parsedGenres.forEach((genre) -> groupGenreOrAddNew(allGenresSet,genreMappings,genre));
     }
 
     protected static void groupGenreOrAddNew(SortedSet<String> genreSet, Map<String,String> genreMappings, String newGenreName){
@@ -108,6 +234,8 @@ public class MovieInserter {
                 currentSimilarGenre = potentialGenre;
             }
         }
+        //Experimental. Should we compare against genre names that we just added?
+        //genreSet.add(newGenreName);
         //Case1: Some existing genre is similar enough, we will map newGenreName to this existing genre
         if (maxSimilarity >= minSimilarityPercent )
             genreMappings.put(newGenreName,currentSimilarGenre);
@@ -121,6 +249,7 @@ public class MovieInserter {
     public static void main(String[] args) {
         MovieInserter domParser = new MovieInserter();
         //domParser.testConnection();
-        domParser.testGenreGrouping();
+        //domParser.testGenreGrouping();
+        domParser.executeDBUpdateFromXML("F:\\CS122BProjectLogs\\xml crap\\stanford-movies\\mains243.xml");
     }
 }
