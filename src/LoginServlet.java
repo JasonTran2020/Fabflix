@@ -5,7 +5,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.jasypt.util.password.StrongPasswordEncryptor;
-
+import jakarta.servlet.http.HttpSession;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
@@ -73,6 +73,7 @@ public class LoginServlet extends HttpServlet {
                     request.getSession().setAttribute("user", new User(dbEmail, dbId, dbFirstName, dbLastName, dbCcId, dbExpiryDate, dbAddress));
                     responseJsonObject.addProperty("status", "success");
                     responseJsonObject.addProperty("message", "success");
+                    request.getSession().setAttribute("userRole", "customer");
 
                 } else {
                     responseJsonObject.addProperty("status", "fail");

@@ -54,11 +54,12 @@ public class EmployeeLoginServlet extends HttpServlet {
                     request.getSession().setAttribute("employee", employee);
                     responseJsonObject.addProperty("status", "success");
                     responseJsonObject.addProperty("message", "success");
+                    request.getSession().setAttribute("userRole", "employee");
                 }
 
                 else {
                     responseJsonObject.addProperty("status", "fail");
-                    responseJsonObject.addProperty("message", "incorrect password" + " " + password + "ENCRYPTED:" + encryptedPassword);
+                    responseJsonObject.addProperty("message", "incorrect password");
                 }
             }
 

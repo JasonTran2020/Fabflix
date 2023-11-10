@@ -2,6 +2,7 @@ import jakarta.servlet.*;
 import jakarta.servlet.annotation.WebFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 import javax.sql.DataSource;
 import java.io.IOException;
@@ -36,11 +37,19 @@ public class LoginFilter implements Filter {
             chain.doFilter(request, response);
             return;
         }
+        HttpSession session = httpRequest.getSession(false);
+        String userRole = (session != null) ? (String) session.getAttribute("userRole") : null;
 
         // Redirect to login page if the "user" attribute doesn't exist in session
-        if (httpRequest.getSession().getAttribute("user") == null) {
+        if (userRole == null) {
             httpResponse.sendRedirect("login.html");
-        } else {
+        }
+        else if ("customer".equals(userRole) || "employee".equals(userRole)) {
+                chain.doFilter(request, response); // User is logged in and has a valid role{
+
+        }
+
+        else {
             chain.doFilter(request, response);
         }
     }
