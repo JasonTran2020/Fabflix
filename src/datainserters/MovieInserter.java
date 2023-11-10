@@ -19,10 +19,12 @@ public class MovieInserter {
     protected SortedSet<String> existingGenresSet;
     protected SortedSet<String> allGenresSet;
     protected Map<String,String> genreMappings;
+
     protected static final double minSimilarityPercent = 0.6;
     private static String sqlInsertMovieClause = "INSERT INTO movies VALUES(?,?,?,?,10)";
     private static String sqlInsertGenreClause = "INSERT INTO genres VALUES(NULL,?)";
     private static String sqlGetAllGenres = "SELECT * FROM genres g";
+    private static String sqlInsertGenreInMovieClause = "INSERT INTO genres_in_movies VALUES(?,?)";
     MovieInserter(){
         //As a standalone class not part of the web application, we can't use InitialContext (without prior set up)
         //Instead, manually pass in the parameters to connect to the db. Not preferable due to have duplicate locations holding their own user and password strings
@@ -45,7 +47,7 @@ public class MovieInserter {
 
             setupExistingGenresAndGroupGenresTogether(parsedGenres,connection);
             insertNewGenresIntoDb(connection);
-            insertMoviesIntoDb(movies,connection);
+            insertMoviesIntoDb(movies,getExistingGenresAndIdFromDb(connection),connection);
 
         } catch (SQLException e){
             System.out.println(e.toString());
@@ -76,17 +78,21 @@ public class MovieInserter {
         insertStatement.executeUpdate();
     }
 
-    protected void insertMoviesIntoDb(Set<Movie> movies, Connection connection) throws SQLException {
+    protected void insertMoviesIntoDb(Set<Movie> movies,Map<String,Integer> genreDBIdMappings, Connection connection) throws SQLException {
         //Doesn't check against duplicate movies currently in DB
+        //Also adds entries to genres in movies
         PreparedStatement statement = connection.prepareStatement(sqlInsertMovieClause);
+        int count = 1
         for (Movie movie :movies){
             int offset = 0;
             while(true){
                 //Try catch to handle duplicate primary keys
                 try{
                     movie.movieId = movie.generateDBIdFromHashCode(offset);
-                    System.out.println("Inserting this movie into DB: " + movie);
+                    System.out.println(count+". Inserting movie into DB: " + movie);
                     insertSingleMovieIntoDB(movie,statement);
+                    insertGenresInMovieIntoDb(connection,movie,genreDBIdMappings);
+                    count+=1;
                     break;
                 }
                 catch (SQLException e){
@@ -95,6 +101,7 @@ public class MovieInserter {
                         offset+=1;
                     }
                     else{
+                        System.out.println(e);
                         throw e;
                     }
                 }
@@ -118,8 +125,31 @@ public class MovieInserter {
                 //After inserting, also add it to the existingGenresSet so we don't add it again
                 existingGenresSet.add(entry.getValue());
             }
+        }
+    }
+    protected void insertGenresInMovieIntoDb(Connection connection, Movie movie, Map<String, Integer> genreDBIdMappings ) throws SQLException {
+        PreparedStatement statement = connection.prepareStatement(sqlInsertGenreInMovieClause);
+        for (String genreName: movie.genres){
+            //Needed due to grouping certain genres together
+            String actualGenreName = genreMappings.get(genreName);
+            int genreDbId = genreDBIdMappings.get(actualGenreName);
+            statement.setInt(1,genreDbId);
+            statement.setString(2,movie.movieId);
+            try{
+                statement.executeUpdate();
+            }
+            catch (SQLException e){
+                //Some movies in the xml have duplicate genres. Handle it here, do not let it populate up
+                if (e.getErrorCode() == MysqlErrorNumbers.ER_DUP_ENTRY){
+                    System.out.println("Duplicate genre of "+genreName+" for the movie "+movie.movieId+". No point in have duplicate genre in movies. Ignoring and continuing");
+                }
+                else{
+                    System.out.println("Ran into this SQL exception when adding "+genreName+" to the movie "+movie.movieId+": "+e+".\n Ignoring and moving on");
+                }
+            }
 
         }
+        statement.close();
     }
     protected void testGenreGrouping(){
         try {
@@ -142,6 +172,19 @@ public class MovieInserter {
         SortedSet<String> result = new TreeSet<>();
         while (rs.next()){
             result.add(rs.getString("name"));
+        }
+        statement.close();
+        rs.close();
+        return result;
+    }
+
+    protected Map<String,Integer> getExistingGenresAndIdFromDb(Connection conn) throws SQLException{
+        Statement statement = conn.createStatement();
+        ResultSet rs = statement.executeQuery(sqlGetAllGenres);
+        //Decision based on this https://stackoverflow.com/questions/18564744/fastest-way-to-find-strings-in-string-collection-that-begin-with-certain-chars
+        Map<String,Integer> result = new HashMap<>();
+        while (rs.next()){
+            result.put(rs.getString("name"),rs.getInt("id"));
         }
         statement.close();
         rs.close();
