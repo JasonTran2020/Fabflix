@@ -36,7 +36,7 @@ public class EmployeeLoginFilter implements Filter {
 
         // Redirect to login page if the "user" attribute doesn't exist in session
         if (httpRequest.getSession().getAttribute("employee") == null) {
-            httpResponse.sendRedirect("/_dashboard/login.html");
+            httpResponse.sendRedirect("/project1/_dashboard/login.html");
         } else {
             chain.doFilter(request, response);
         }
