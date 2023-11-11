@@ -11,6 +11,7 @@ import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -18,11 +19,8 @@ public class StarInMovieInserter {
 
     private DataSource dataSource;
     public static String sqlInsertStarInMovieClause = "INSERT INTO stars_in_movies VALUES(?,?)";
-    private Map<String,String> moviesXmlIdToDbId = null;
-
-
-
-    private Map<String,String> starsXmlIdToDbId = null;
+    private Map<String,String> moviesXmlIdToDbId = new HashMap<>();
+    private Map<String,String> starsXmlIdToDbId = new HashMap<>();
     StarInMovieInserter(){
         //As a standalone class not part of the web application, we can't use InitialContext (without prior set up)
         //Instead, manually pass in the parameters to connect to the db. Not preferable due to have duplicate locations holding their own user and password strings
