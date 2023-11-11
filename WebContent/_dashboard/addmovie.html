@@ -19,15 +19,27 @@
 </nav>
     <h2>Add a Movie to the Database</h2>
     <div id="add_movie_container">
-        <form id="add_star_form" method="post">
-            <label for="star_name"><b>Star Name</b></label>
-            <input id="star_name" name="star_name" placeholder="Enter name" type="text" required>
+        <form id="add_movie_form" method="post">
+            <label for="movie_name"><b>Enter Movie Name</b></label>
+            <input id="movie_name" name="movie_name" placeholder="Movie Name" type="text" required>
             <br>
-            <label for="birth_year"><b>Birth Year</b></label>
-            <input id="birth_year" name="birth_year" placeholder="Enter year (optional)" type="number">
+            <label for="movie_year"><b> Enter Movie Year</b></label>
+            <input id="movie_year" name="movie_year" placeholder="Year" type="number" required>
             <br>
-            <input type="submit" value="Add Star">
-            <div id="add_star_message"></div>
+            <label for="movie_director"><b>Enter Director</b></label>
+            <input id="movie_director" name="movie_director" placeholder="Director" type="text" required>
+            <br>
+            <label for="star_name"><b>Enter Star Name</b></label>
+            <input id="star_name" name="star_name" placeholder="Star Name" type="text" required>
+            <br>
+            <label for="birth_year"><b>Enter Star Birth Year</b></label>
+            <input id="birth_year" name="birth_year" placeholder="Birth Year (optional)" type="number">
+            <br>
+            <label for="movie_genre"><b>Enter Movie Genre</b></label>
+            <input id="movie_genre" name="movie_genre" placeholder="Genre" type="text" required>
+            <br>
+            <input type="submit" value="Submit Movie">
+            <div id="add_movie_message"></div>
         </form>
     </div>
 
@@ -35,7 +47,7 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 
     <!-- Include your JavaScript file that handles the form submission -->
-    <script src="./addstar.js"></script>
+    <script src="./addmovie.js"></script>
 
 </body>
 </html>
