@@ -20,8 +20,8 @@ public class StarsDomParser extends DomParser{
             Element element = (Element) starNodeList.item(i);
             Star star = parseStar(element);
             try{
-                verifyStar(star);
-                System.out.println(i+1+": " + star);
+                verifyStar(star,element,i);
+                //System.out.println(i+1+": " + star);
                 stars.add(star);
             }
             catch (StarsDomParser.StarParseError e){
@@ -37,12 +37,12 @@ public class StarsDomParser extends DomParser{
         return new Star("Default",starName,birthYear);
     }
 
-    private void verifyStar(Star star){
+    private void verifyStar(Star star, Element element, int position){
         if (star.name == null || star.name.isEmpty()){
-            throw new StarParseError("Actor entry doesn't have a name. Skipping it");
+            throw new StarParseError("Error parsing actor"+position+": entry doesn't have a name at element \"stagename\". Skipping it");
         }
         if (star.birthYear == null || star.birthYear==-1){
-            System.out.println("The actor " +star.name+" doesn't have a birth year. Setting to null");
+            System.out.println("Error parsing actor"+position+": The actor " +star.name+" doesn't have a birth year at element \"dob\". Setting birthyear to null");
             star.birthYear = null;
         }
     }

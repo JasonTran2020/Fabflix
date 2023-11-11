@@ -18,8 +18,8 @@ public class CastDomParser extends DomParser{
             Element element = (Element) castNodeList.item(i);
             StarInMovie starInMovie = parseCast(element);
             try{
-                verifyStarInMovie(starInMovie);
-                System.out.println(i+1+": " + starInMovie);
+                verifyStarInMovie(starInMovie,element,i);
+                //System.out.println(i+1+": " + starInMovie);
                 starsInMovies.add(starInMovie);
             }
             catch (SIMParseError e){
@@ -36,12 +36,15 @@ public class CastDomParser extends DomParser{
         return new StarInMovie(xmlMovieId,xmlStarId);
     }
 
-    private void verifyStarInMovie(StarInMovie starInMovie) throws SIMParseError{
+    private void verifyStarInMovie(StarInMovie starInMovie, Element element, int position) throws SIMParseError{
         if (starInMovie.xmlMovieId == null || starInMovie.xmlMovieId.isEmpty()){
-            throw new SIMParseError("No movieId for particular cast. Ignoring element");
+            throw new SIMParseError("Error parsing Cast"+position+starInMovie+": No movieId for particular cast at element \"f\". Ignoring entry");
         }
         if (starInMovie.xmlStarId == null || starInMovie.xmlStarId.isEmpty()){
-            throw new SIMParseError("No name/actor id for particular cast. Ignoring element");
+            throw new SIMParseError("Error parsing Cast"+position+starInMovie+": No name/actor id for particular cast at element \"a\". Ignoring entry");
+        }
+        if (starInMovie.xmlStarId!=null && starInMovie.xmlStarId.equals("sa")){
+            throw new SIMParseError("Error parsing Cast"+position+starInMovie+": Name/actor id for particular cast at element \"a\" is \"sa\", meaning \"Some Actor\". Ignoring entry");
         }
     }
 
