@@ -3,20 +3,21 @@ package datainserters;
 import com.mysql.cj.MysqlType;
 import com.mysql.cj.exceptions.MysqlErrorNumbers;
 import com.mysql.cj.jdbc.MysqlDataSource;
-import datainserters.XMLparsers.MovieDomParser;
 import datainserters.XMLparsers.StarsDomParser;
-import datamodels.dbitems.Movie;
 import datamodels.dbitems.Star;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 public class StarInserter {
 
     private static String sqlInsertStarClause = "INSERT INTO stars VALUES(?,?,?)";
+    protected Map<String,String> starXmlIdToDbId = new HashMap<>();
     private DataSource dataSource;
     StarInserter(){
         //As a standalone class not part of the web application, we can't use InitialContext (without prior set up)
@@ -53,6 +54,7 @@ public class StarInserter {
                 try{
                     star.starId = star.generateDBIdFromHashCode(offset);
                     insertSingleStarIntoDb(star,statement);
+                    addStarToIdMapping(star);
                     System.out.println(count+". Inserting star into DB: " + star);
                     count+=1;
                     break;
@@ -72,6 +74,13 @@ public class StarInserter {
         statement.close();
     }
 
+    protected void addStarToIdMapping(Star star){
+        if (star.name == null || star.name.isEmpty()){
+            return;
+        }
+        starXmlIdToDbId.put(star.name,star.starId);
+    }
+
     protected void insertSingleStarIntoDb(Star star, PreparedStatement statement) throws SQLException {
         statement.setString(1, star.starId);
         statement.setString(2,star.name);
@@ -84,6 +93,10 @@ public class StarInserter {
 
 
         statement.executeUpdate();
+    }
+
+    public Map<String, String> getStarXmlIdToDbId() {
+        return starXmlIdToDbId;
     }
 
     public static void main(String[] args){

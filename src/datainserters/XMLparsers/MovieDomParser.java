@@ -50,10 +50,11 @@ public class MovieDomParser extends DomParser {
         int year = getIntValue(element, "year");
         List<String> genres = getTextList(element,"cat");
         capitalizeStringList(genres);
+        String xmlId = getTextValue(element,"fid");
 
 
         // create a new Employee with the value read from the xml nodes
-        return new Movie(generateRandomMovieId(), title, year, director,genres);
+        return new Movie(generateRandomMovieId(), title, year, director,genres,xmlId);
     }
 
 
@@ -72,15 +73,19 @@ public class MovieDomParser extends DomParser {
     public void verifyMovie(Movie movie, Element element,int position) throws MovieParseError{
         boolean failed = false;
         if (movie.title==null || movie.title.isEmpty()){
-            System.out.println("Error parsing movie"+position+": Movie doesn't have a title at element \"t\". Not inserting movie.");
+            System.out.println("Error parsing movie"+position+" "+movie+": Movie doesn't have a title at element \"t\". Not inserting movie.");
             throw new MovieParseError();
         }
-        else if (movie.director == null || movie.director.isEmpty()){
-            System.out.println("Error parsing movie"+position+": Movie doesn't have a director at element \"dirn\". Setting directory as Unknown.");
+        if (movie.director == null || movie.director.isEmpty()){
+            System.out.println("Error parsing movie"+position+" "+movie+": Movie doesn't have a director at element \"dirn\". Setting directory as Unknown.");
             movie.director = "Unknown";
         }
-        else if (movie.year==-1){
-            System.out.println("Error parsing movie"+position+": Failed to parse year from element \"year\". Had a value of "+getTextValue(element,"year")+".Setting date as -1.");
+        if (movie.year==-1){
+            System.out.println("Error parsing movie"+position+" "+movie+": Failed to parse year from element \"year\". Had a value of "+getTextValue(element,"year")+".Setting date as -1.");
+        }
+        if (movie.xmlId == null || movie.xmlId.isEmpty()){
+            movie.xmlId=null;
+            System.out.println("Error parsing movie"+position+" "+movie+": Failed to parse xml id from element \"fid\". Setting to null. Will be unable to link stars later on");
         }
 
     }

@@ -8,13 +8,15 @@ public class Movie {
     public int year;
     public String director;
     public List<String> genres;
+    public String xmlId = null;
 
-    public Movie(String movieId, String title, int year, String director,List<String> genres){
+    public Movie(String movieId, String title, int year, String director,List<String> genres,String xmlId){
         this.movieId = movieId;
         this.title = title;
         this.year = year;
         this.director = director;
         this.genres = genres;
+        this.xmlId = xmlId;
     }
 
     public String toString(){

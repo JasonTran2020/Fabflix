@@ -38,13 +38,13 @@ public class CastDomParser extends DomParser{
 
     private void verifyStarInMovie(StarInMovie starInMovie, Element element, int position) throws SIMParseError{
         if (starInMovie.xmlMovieId == null || starInMovie.xmlMovieId.isEmpty()){
-            throw new SIMParseError("Error parsing Cast"+position+starInMovie+": No movieId for particular cast at element \"f\". Ignoring entry");
+            throw new SIMParseError("Error parsing Cast"+position+" "+starInMovie+": No movieId for particular cast at element \"f\". Ignoring entry");
         }
         if (starInMovie.xmlStarId == null || starInMovie.xmlStarId.isEmpty()){
-            throw new SIMParseError("Error parsing Cast"+position+starInMovie+": No name/actor id for particular cast at element \"a\". Ignoring entry");
+            throw new SIMParseError("Error parsing Cast"+position+" "+starInMovie+": No name/actor id for particular cast at element \"a\". Ignoring entry");
         }
         if (starInMovie.xmlStarId!=null && starInMovie.xmlStarId.equals("sa")){
-            throw new SIMParseError("Error parsing Cast"+position+starInMovie+": Name/actor id for particular cast at element \"a\" is \"sa\", meaning \"Some Actor\". Ignoring entry");
+            throw new SIMParseError("Error parsing Cast"+position+" "+starInMovie+": Name/actor id for particular cast at element \"a\" is \"sa\", meaning \"Some Actor\". Ignoring entry");
         }
     }
 

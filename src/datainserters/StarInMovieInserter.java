@@ -20,12 +20,7 @@ public class StarInMovieInserter {
     public static String sqlInsertStarInMovieClause = "INSERT INTO stars_in_movies VALUES(?,?)";
     private Map<String,String> moviesXmlIdToDbId = null;
 
-    public void setMoviesXmlIdToDbId(Map<String, String> moviesXmlIdToDbId) {
-        this.moviesXmlIdToDbId = moviesXmlIdToDbId;
-    }
-    public void setStarsXmlIdToDbId(Map<String, String> starsXmlIdToDbId) {
-        this.starsXmlIdToDbId = starsXmlIdToDbId;
-    }
+
 
     private Map<String,String> starsXmlIdToDbId = null;
     StarInMovieInserter(){
@@ -40,7 +35,8 @@ public class StarInMovieInserter {
     }
 
     public void executeDBUpdateFromXMLAndMappings(String filePath, Map<String,String> moviesMapping, Map<String,String> starsMapping){
-        //Inserts genres, then movies, then genres in movies in that order
+        moviesXmlIdToDbId = moviesMapping;
+        starsXmlIdToDbId = starsMapping;
         try (Connection connection = dataSource.getConnection()){
             CastDomParser castDomParser = new CastDomParser();
             castDomParser.executeStarsParsingFromXmlFile(filePath);
@@ -62,12 +58,18 @@ public class StarInMovieInserter {
                 System.out.println(count+". Inserting star in movie into DB: " + starInMovie);
                 count+=1;
             }
-            catch(SQLException e){
-                if (e.getErrorCode()== MysqlErrorNumbers.ER_DUP_ENTRY){
-                    System.out.println("Duplicate entry of star in movie "+ starInMovie+". Skipping insertion into DB");
+            catch(SQLException|MissingPrimaryKeyException error){
+                if (error.getClass() == SQLException.class){
+                    SQLException e = (SQLException) error;
+                    if (e.getErrorCode()== MysqlErrorNumbers.ER_DUP_ENTRY){
+                        System.out.println("Duplicate entry of star in movie "+ starInMovie+". Skipping insertion into DB");
+                    }
+                    else{
+                        throw e;
+                    }
                 }
-                else{
-                    throw e;
+                else if (error.getClass() == MissingPrimaryKeyException.class){
+                    System.out.println(error);
                 }
             }
         }
@@ -78,8 +80,8 @@ public class StarInMovieInserter {
     public void insertSingleStarInMovieIntoDb(StarInMovie starInMovie, PreparedStatement preparedStatement) throws SQLException {
         if (!moviesXmlIdToDbId.containsKey(starInMovie.xmlMovieId)) throw new MissingPrimaryKeyException("Cannot map movie xml id to MySql id of "+starInMovie+". Skipping entry");
         if (!starsXmlIdToDbId.containsKey(starInMovie.xmlStarId)) throw new MissingPrimaryKeyException("Cannot map star xml id to MySql id of " + starInMovie+". Skipping entry");
-        preparedStatement.setString(1,starInMovie.xmlMovieId);
-        preparedStatement.setString(2,starInMovie.xmlStarId);
+        preparedStatement.setString(1,starsXmlIdToDbId.get(starInMovie.xmlStarId));
+        preparedStatement.setString(2,moviesXmlIdToDbId.get(starInMovie.xmlMovieId));
         preparedStatement.executeUpdate();
     }
 
