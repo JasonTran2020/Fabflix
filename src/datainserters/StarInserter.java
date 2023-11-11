@@ -69,6 +69,7 @@ public class StarInserter {
                 }
             }
         }
+        statement.close();
     }
 
     protected void insertSingleStarIntoDb(Star star, PreparedStatement statement) throws SQLException {
