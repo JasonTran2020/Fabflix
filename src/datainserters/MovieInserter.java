@@ -19,6 +19,7 @@ public class MovieInserter {
     protected SortedSet<String> existingGenresSet;
     protected SortedSet<String> allGenresSet;
     protected Map<String,String> genreMappings;
+    protected Map<String,String> movieXmlIdToDbId = new HashMap<>();
 
     protected static final double minSimilarityPercent = 0.6;
     private static String sqlInsertMovieClause = "INSERT INTO movies VALUES(?,?,?,?,10)";
@@ -92,6 +93,7 @@ public class MovieInserter {
                     movie.movieId = movie.generateDBIdFromHashCode(offset);
                     System.out.println(count+". Inserting movie into DB: " + movie);
                     insertSingleMovieIntoDB(movie,statement);
+                    addMovieToIdMapping(movie);
                     insertGenresInMovieIntoDb(connection,movie,genreDBIdMappings);
                     insertRatingIntoDb(connection,movie);
                     count+=1;
@@ -116,6 +118,13 @@ public class MovieInserter {
     protected void insertSingleGenreIntoDb(String genreName, PreparedStatement insertStatement) throws SQLException {
         insertStatement.setString(1,genreName);
         insertStatement.executeUpdate();
+    }
+    protected void addMovieToIdMapping(Movie movie){
+        //No id? not adding to mapping
+        if (movie.xmlId == null || movie.xmlId.isEmpty()){
+            return;
+        }
+        movieXmlIdToDbId.put(movie.xmlId, movie.movieId);
     }
 
     protected void insertNewGenresIntoDb(Connection connection) throws SQLException {
@@ -164,6 +173,9 @@ public class MovieInserter {
         catch (SQLException e){
             if (e.getErrorCode() == MysqlErrorNumbers.ER_DUP_ENTRY){
                 System.out.println("Duplicate rating. Ignoring current insertion");
+            }
+            else{
+                System.out.println(e);
             }
         }
         statement.close();
@@ -246,6 +258,11 @@ public class MovieInserter {
             genreMappings.put(newGenreName,newGenreName);
 
     }
+
+    public Map<String, String> getMovieXmlIdToDbId() {
+        return movieXmlIdToDbId;
+    }
+
     public static void main(String[] args) {
         MovieInserter domParser = new MovieInserter();
         //domParser.testConnection();
