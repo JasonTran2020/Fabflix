@@ -47,6 +47,7 @@ public class StarInserter {
 
     protected void insertStarsIntoDb(Set<Star> stars, Connection connection) throws SQLException {
         PreparedStatement statement = connection.prepareStatement(sqlInsertStarClause);
+        //connection.setAutoCommit(false);
         int count = 1;
         for (Star star: stars){
             int offset = 0;
@@ -71,6 +72,7 @@ public class StarInserter {
                 }
             }
         }
+        //connection.commit();
         statement.close();
     }
 

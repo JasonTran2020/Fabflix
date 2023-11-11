@@ -49,6 +49,7 @@ public class StarInMovieInserter {
 
     public void insertStarsInMoviesIntoDb(Set<StarInMovie> starsInMovies,Connection connection) throws SQLException {
         PreparedStatement statement = connection.prepareStatement(sqlInsertStarInMovieClause);
+        //connection.setAutoCommit(false);
         int count =1;
         for (StarInMovie starInMovie: starsInMovies){
             try{
@@ -71,6 +72,7 @@ public class StarInMovieInserter {
                 }
             }
         }
+        //connection.commit();
         statement.close();
 
     }

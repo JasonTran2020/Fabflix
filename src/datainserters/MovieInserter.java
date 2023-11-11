@@ -12,6 +12,8 @@ import javax.naming.NamingException;
 import javax.sql.DataSource;
 import javax.xml.crypto.Data;
 import java.sql.*;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.*;
 
 public class MovieInserter {
@@ -84,6 +86,7 @@ public class MovieInserter {
         //Doesn't check against duplicate movies currently in DB
         //Also adds entries to genres in movies
         PreparedStatement statement = connection.prepareStatement(sqlInsertMovieClause);
+        //connection.setAutoCommit(false);
         int count = 1;
         for (Movie movie :movies){
             int offset = 0;
@@ -112,7 +115,7 @@ public class MovieInserter {
             }
 
         }
-
+        //connection.commit();
         statement.close();
     }
     protected void insertSingleGenreIntoDb(String genreName, PreparedStatement insertStatement) throws SQLException {
@@ -267,6 +270,11 @@ public class MovieInserter {
         MovieInserter domParser = new MovieInserter();
         //domParser.testConnection();
         //domParser.testGenreGrouping();
+        Instant start = Instant.now();
         domParser.executeDBUpdateFromXML("F:\\CS122BProjectLogs\\xml crap\\stanford-movies\\mains243.xml");
+        Instant finish = Instant.now();
+        long timeElapsed = Duration.between(start, finish).toMillis();
+        System.out.println("Seconds it took to parse and insert the movies into the DB (auto-commit off): " +timeElapsed+" milliseconds");
+
     }
 }
