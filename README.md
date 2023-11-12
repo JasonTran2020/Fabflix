@@ -43,7 +43,7 @@ How the LIKE operator was used in searching:
 ---------
 Project 3:
 ---------
-Demo video URL: 
+Demo video URL: https://youtu.be/NlFyaPVZE-w
 
 Jason Tran's work:
 * Added HTTPS (Task 2)
