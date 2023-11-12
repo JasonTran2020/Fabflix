@@ -21,7 +21,7 @@ public class StarInserter {
     private Set<Star> existingStars = new HashSet<>();
     protected Set<String> existingStarIds = new HashSet<>();
     protected Map<String,String> starXmlIdToDbId = new HashMap<>();
-
+    protected static final int maxBatchSize = 100;
     private DataSource dataSource;
     StarInserter(){
         //As a standalone class not part of the web application, we can't use InitialContext (without prior set up)
@@ -51,7 +51,7 @@ public class StarInserter {
 
     public void insertStarsIntoDb(Set<Star> stars, Connection connection) throws SQLException {
         PreparedStatement statement = connection.prepareStatement(sqlInsertStarClause);
-
+        int currentBatchSize =0;
         connection.setAutoCommit(false);
         int count = 1;
         for (Star star: stars){
@@ -70,6 +70,7 @@ public class StarInserter {
                     }
 
                     addSingleStarToBatch(star,statement);
+                    currentBatchSize+=1;
                     //insertSingleStarIntoDb(star,statement);
                     addStarToIdMapping(star);
                     //System.out.println(count+". Inserting star into DB: " + star);
@@ -86,6 +87,12 @@ public class StarInserter {
                         throw e;
                     }
                 }
+            }
+            if (currentBatchSize>maxBatchSize){
+                statement.executeBatch();
+                statement.clearBatch();
+                System.out.println("Executing small star batch");
+                currentBatchSize=0;
             }
         }
         System.out.println("Executing star batch");

@@ -25,6 +25,7 @@ public class StarInMovieInserter {
     public int countActorsAddedInCast = 0;
     public int countNoMovieFid = 0;
     private Set<Star> newStarsFromCast = new HashSet<>();
+    protected static final int maxBatchSize = 100;
     StarInMovieInserter(){
         //As a standalone class not part of the web application, we can't use InitialContext (without prior set up)
         //Instead, manually pass in the parameters to connect to the db. Not preferable due to have duplicate locations holding their own user and password strings
@@ -55,11 +56,13 @@ public class StarInMovieInserter {
     public void insertStarsInMoviesIntoDb(Set<StarInMovie> starsInMovies,Connection connection) throws SQLException {
         PreparedStatement statement = connection.prepareStatement(sqlInsertStarInMovieClause);
         connection.setAutoCommit(false);
+        int currentBatchSize =0;
         int count =1;
         for (StarInMovie starInMovie: starsInMovies){
             try{
                 //insertSingleStarInMovieIntoDb(starInMovie,statement);
                 addSingleStarInMovieToBatch(starInMovie,statement);
+                currentBatchSize +=1;
                 //System.out.println(count+". Adding star in movie to batch: " + starInMovie);
                 //System.out.println(count+". Inserting star in movie into DB: " + starInMovie);
                 count+=1;
@@ -77,6 +80,12 @@ public class StarInMovieInserter {
                 else if (error.getClass() == MissingPrimaryKeyException.class){
                     System.out.println(error);
                 }
+            }
+            if (currentBatchSize>maxBatchSize){
+                System.out.println("Executing small batch to add Star in Movie entries");
+                statement.executeBatch();
+                statement.clearBatch();
+                currentBatchSize=0;
             }
         }
 

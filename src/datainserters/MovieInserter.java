@@ -31,6 +31,7 @@ public class MovieInserter {
     private static String sqlGetAllMovieIds = "SELECT id FROM movies";
     private static String sqlInsertGenreInMovieClause = "INSERT INTO genres_in_movies VALUES(?,?)";
     private static String sqlInsertDefaultRatingInMovieClause = "INSERT INTO ratings VALUES(?,?,?)";
+    protected static final int maxBatchSize = 100;
     MovieInserter(){
         //As a standalone class not part of the web application, we can't use InitialContext (without prior set up)
         //Instead, manually pass in the parameters to connect to the db. Not preferable due to have duplicate locations holding their own user and password strings
@@ -95,6 +96,7 @@ public class MovieInserter {
     protected void insertMoviesIntoDb(Set<Movie> movies,Map<String,Integer> genreDBIdMappings, Connection connection) throws SQLException {
         //Doesn't check against duplicate movies currently in DB
         //Also adds entries to genres in movies
+        int currentBatchSize =0;
         PreparedStatement statement = connection.prepareStatement(sqlInsertMovieClause);
         PreparedStatement genreStatement = connection.prepareStatement(sqlInsertGenreInMovieClause);
         PreparedStatement ratingStatement = connection.prepareStatement(sqlInsertDefaultRatingInMovieClause);
@@ -119,6 +121,7 @@ public class MovieInserter {
                     //System.out.println(count+". Adding movie to batch: " + movie);
                     //insertSingleMovieIntoDB(movie,statement);
                     addSingleMovieToBatch(movie,statement);
+                    currentBatchSize+=1;
                     addMovieToIdMapping(movie);
                     //insertGenresInMovieIntoDb(connection,movie,genreDBIdMappings);
                     //insertRatingIntoDb(connection,movie);
@@ -137,6 +140,17 @@ public class MovieInserter {
                         throw e;
                     }
                 }
+            }
+            if (currentBatchSize>maxBatchSize){
+                System.out.println("Executing small movie batch");
+                statement.executeBatch();
+                genreStatement.executeBatch();
+                ratingStatement.executeBatch();
+
+                statement.clearBatch();
+                genreStatement.clearBatch();
+                ratingStatement.clearBatch();
+                currentBatchSize=0;
             }
 
         }
