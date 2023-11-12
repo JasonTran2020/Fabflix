@@ -10,6 +10,9 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class StarsDomParser extends DomParser{
+    public int countActorDuplicate =0;
+    public int countActorNoName = 0;
+    public int countActorNoDOB = 0;
     Set<Star> stars = new HashSet<>();
     private void parseAllStars(){
         Element documentElement = dom.getDocumentElement();
@@ -22,7 +25,14 @@ public class StarsDomParser extends DomParser{
             try{
                 verifyStar(star,element,i);
                 //System.out.println(i+1+": " + star);
-                stars.add(star);
+                if (stars.contains(star)){
+                    countActorDuplicate+=1;
+                    System.out.println("Duplicate actor of "+star+". Ignoring and moving on");
+                }
+                else{
+                    stars.add(star);
+                }
+
             }
             catch (StarsDomParser.StarParseError e){
                 System.out.println(e);
@@ -39,9 +49,11 @@ public class StarsDomParser extends DomParser{
 
     private void verifyStar(Star star, Element element, int position){
         if (star.name == null || star.name.isEmpty()){
+            countActorNoName+=1;
             throw new StarParseError("Error parsing actor"+position+": entry doesn't have a name at element \"stagename\". Skipping it");
         }
         if (star.birthYear == null || star.birthYear==-1){
+            countActorNoDOB+=1;
             System.out.println("Error parsing actor"+position+": The actor " +star.name+" doesn't have a birth year at element \"dob\". Setting birthyear to null");
             star.birthYear = null;
         }

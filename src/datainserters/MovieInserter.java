@@ -12,9 +12,12 @@ import javax.naming.NamingException;
 import javax.sql.DataSource;
 import javax.xml.crypto.Data;
 import java.sql.*;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.*;
 
 public class MovieInserter {
+    public MovieDomParser movieDomParser= null;
     private DataSource dataSource;
     protected SortedSet<String> existingGenresSet;
     protected SortedSet<String> allGenresSet;
@@ -25,6 +28,7 @@ public class MovieInserter {
     private static String sqlInsertMovieClause = "INSERT INTO movies VALUES(?,?,?,?,10)";
     private static String sqlInsertGenreClause = "INSERT INTO genres VALUES(NULL,?)";
     private static String sqlGetAllGenres = "SELECT * FROM genres g";
+    private static String sqlGetAllMovieIds = "SELECT id FROM movies";
     private static String sqlInsertGenreInMovieClause = "INSERT INTO genres_in_movies VALUES(?,?)";
     private static String sqlInsertDefaultRatingInMovieClause = "INSERT INTO ratings VALUES(?,?,?)";
     MovieInserter(){
@@ -42,7 +46,7 @@ public class MovieInserter {
     public void executeDBUpdateFromXML(String filePath){
         //Inserts genres, then movies, then genres in movies in that order
         try (Connection connection = dataSource.getConnection()){
-            MovieDomParser movieDomParser = new MovieDomParser();
+            movieDomParser = new MovieDomParser();
             movieDomParser.executeMoviesParsingFromXmlFile(filePath);
             Set<Movie> movies = movieDomParser.getMovies();
             Set<String> parsedGenres = movieDomParser.getParsedGenres();
@@ -79,23 +83,47 @@ public class MovieInserter {
 
         insertStatement.executeUpdate();
     }
+    protected void addSingleMovieToBatch(Movie movie, PreparedStatement insertStatement) throws SQLException {
+        insertStatement.setString(1, movie.movieId);
+        insertStatement.setString(2, movie.title);
+        insertStatement.setInt(3,movie.year);
+        insertStatement.setString(4,movie.director);
+
+        insertStatement.addBatch();
+    }
 
     protected void insertMoviesIntoDb(Set<Movie> movies,Map<String,Integer> genreDBIdMappings, Connection connection) throws SQLException {
         //Doesn't check against duplicate movies currently in DB
         //Also adds entries to genres in movies
         PreparedStatement statement = connection.prepareStatement(sqlInsertMovieClause);
+        PreparedStatement genreStatement = connection.prepareStatement(sqlInsertGenreInMovieClause);
+        PreparedStatement ratingStatement = connection.prepareStatement(sqlInsertDefaultRatingInMovieClause);
+        Set<String> existingMovieIds = getExistingMovieIdFromDb(connection);
+        connection.setAutoCommit(false);
         int count = 1;
         for (Movie movie :movies){
             int offset = 0;
             while(true){
                 //Try catch to handle duplicate primary keys
                 try{
-                    movie.movieId = movie.generateDBIdFromHashCode(offset);
-                    System.out.println(count+". Inserting movie into DB: " + movie);
-                    insertSingleMovieIntoDB(movie,statement);
+                    while(true){
+                        movie.movieId = movie.generateDBIdFromHashCode(offset);
+                        if (existingMovieIds.contains(movie.movieId)){
+                            //System.out.println("Duplicate key of "+movie.movieId+". Attempting to make new primary key");
+                            offset+=1;
+                            continue;
+                        }
+                        existingMovieIds.add(movie.movieId);
+                        break;
+                    }
+                    //System.out.println(count+". Adding movie to batch: " + movie);
+                    //insertSingleMovieIntoDB(movie,statement);
+                    addSingleMovieToBatch(movie,statement);
                     addMovieToIdMapping(movie);
-                    insertGenresInMovieIntoDb(connection,movie,genreDBIdMappings);
-                    insertRatingIntoDb(connection,movie);
+                    //insertGenresInMovieIntoDb(connection,movie,genreDBIdMappings);
+                    //insertRatingIntoDb(connection,movie);
+                    addGenresInMovieToBatch(genreStatement,movie,genreDBIdMappings);
+                    adddRatingToBatch(ratingStatement,movie);
                     count+=1;
                     break;
                 }
@@ -112,8 +140,16 @@ public class MovieInserter {
             }
 
         }
+        System.out.println("Executing movie batch");
+        statement.executeBatch();
+        genreStatement.executeBatch();
+        ratingStatement.executeBatch();
+
+        connection.commit();
 
         statement.close();
+        genreStatement.close();
+        ratingStatement.close();
     }
     protected void insertSingleGenreIntoDb(String genreName, PreparedStatement insertStatement) throws SQLException {
         insertStatement.setString(1,genreName);
@@ -162,10 +198,32 @@ public class MovieInserter {
         }
         statement.close();
     }
+    protected void addGenresInMovieToBatch(PreparedStatement statement, Movie movie, Map<String, Integer> genreDBIdMappings ) throws SQLException {
+        Set<String> uniqueGenres = new HashSet<>(movie.genres);
+        for (String genreName: uniqueGenres){
+            //Needed due to grouping certain genres together
+            String actualGenreName = genreMappings.get(genreName);
+            int genreDbId = genreDBIdMappings.get(actualGenreName);
+            statement.setInt(1,genreDbId);
+            statement.setString(2,movie.movieId);
+            try{
+                statement.addBatch();
+            }
+            catch (SQLException e){
+                //Some movies in the xml have duplicate genres. Handle it here, do not let it populate up
+                if (e.getErrorCode() == MysqlErrorNumbers.ER_DUP_ENTRY){
+                    System.out.println("Duplicate genre of "+genreName+" for the movie "+movie.movieId+". No point in have duplicate genre in movies. Ignoring and continuing");
+                }
+                else{
+                    System.out.println("Ran into this SQL exception when adding "+genreName+" to the movie "+movie.movieId+": "+e+".\n Ignoring and moving on");
+                }
+            }
+        }
+    }
     protected void insertRatingIntoDb(Connection connection, Movie movie) throws SQLException {
         PreparedStatement statement = connection.prepareStatement(sqlInsertDefaultRatingInMovieClause);
         statement.setString(1,movie.movieId);
-        statement.setFloat(2,0);
+        statement.setFloat(2,-1);
         statement.setInt(3,0);
         try{
             statement.executeUpdate();
@@ -180,6 +238,24 @@ public class MovieInserter {
         }
         statement.close();
     }
+    protected void adddRatingToBatch(PreparedStatement statement, Movie movie) throws SQLException {
+
+        statement.setString(1,movie.movieId);
+        statement.setFloat(2,0);
+        statement.setInt(3,0);
+        try{
+            statement.addBatch();
+        }
+        catch (SQLException e){
+            if (e.getErrorCode() == MysqlErrorNumbers.ER_DUP_ENTRY){
+                System.out.println("Duplicate rating. Ignoring current insertion");
+            }
+            else{
+                System.out.println(e);
+            }
+        }
+
+    }
     protected void testGenreGrouping(){
         try {
             Connection connection = dataSource.getConnection();
@@ -193,6 +269,15 @@ public class MovieInserter {
         } catch (SQLException e){
             throw new RuntimeException(e);
         }
+    }
+    protected Set<String> getExistingMovieIdFromDb(Connection conn) throws SQLException{
+        Statement statement = conn.createStatement();
+        ResultSet rs =statement.executeQuery(sqlGetAllMovieIds);
+        Set<String> result = new HashSet<>();
+        while (rs.next()){
+            result.add(rs.getString(1));
+        }
+        return result;
     }
     protected SortedSet<String> getExistingGenresFromDb(Connection conn) throws SQLException {
         Statement statement = conn.createStatement();
@@ -267,6 +352,11 @@ public class MovieInserter {
         MovieInserter domParser = new MovieInserter();
         //domParser.testConnection();
         //domParser.testGenreGrouping();
-        domParser.executeDBUpdateFromXML("F:\\CS122BProjectLogs\\xml crap\\stanford-movies\\mains243.xml");
+        Instant start = Instant.now();
+        //domParser.executeDBUpdateFromXML("F:\\CS122BProjectLogs\\xml crap\\stanford-movies\\mains243.xml");
+        Instant finish = Instant.now();
+        long timeElapsed = Duration.between(start, finish).toMillis();
+        System.out.println("Seconds it took to parse and insert the movies into the DB (auto-commit off): " +timeElapsed+" milliseconds");
+
     }
 }
