@@ -82,14 +82,14 @@ public class StarInMovieInserter {
                 }
             }
             if (currentBatchSize>maxBatchSize){
-                System.out.println("Executing small batch to add Star in Movie entries");
+                //System.out.println("Executing small batch to add Star in Movie entries");
                 statement.executeBatch();
                 statement.clearBatch();
                 currentBatchSize=0;
             }
         }
 
-        System.out.println("Executing batch to add Star in Movie entries into DB");
+        //System.out.println("Executing batch to add Star in Movie entries into DB");
         statement.executeBatch();
         connection.commit();
         statement.close();

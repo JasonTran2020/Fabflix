@@ -46,6 +46,9 @@ Project 3:
 Demo video URL: 
 
 Jason Tran's work:
+* Added HTTPS (Task 2)
+* Encrypt passwords on AWS (Task 4)
+* Did XML parsing and insertion (Task 6)
 
 
 Eric Chang's work:
@@ -62,9 +65,41 @@ Files with PreparedStatements:
 * EmployeeLoginServlet
 * EmployeeMetadataServlet
 * LoginServlet
+* datainserters.MovieInserter
+* datainserters.StarInserter
+* datainserters.StarInMovieInserter
 * MovieListServlet
 * MovieSearchServlet
 * PurchaseServlet
 * ShoppingCartServlet
 * SingleMovieServlet
 * SingleStarServlet
+
+Inconsistency report when running locally
+* Duplicate movies: 29
+* No movie name: 7
+* No movie year: 18
+* No movie director name: 7
+* No xml FID: 16
+* Duplicate actors: 3
+*  No actor name: 0
+* No actor DOB: 2521
+* Actors in cast but not actors file: 14808
+* Duplicate cast: 1267
+* Movie FIDs that could not be mapped: 948
+* No movie FID for cast: 0
+* No actor name for cast: 3
+
+XML Parsing Optimizations (local testing time on Jason's PC, no auto-commit) <br>
+Prior to any optimization, it took about 47,000 to 49,000 ms<br>
+ <b>Multi-threading</b>
+* Parsing of movies and actors takes place on separate threads (Parsing of casts waits for both of those to finish). 
+* Reduced the time to around 41,000 to 43,000 ms<br>
+
+<b>Batch updates</b>
+* Added prepared statement in batches of size 100, then executed the batch update, and repeat until there was no more data
+* Reduced time to around 44,000 ms to 45,000 ms<br>
+
+<b>Both combined</b>
+* Reduced time to around 39,000 ms to 40,000 ms <br>
+* When auto-commit is on (I know it doesn't count as an optimization requirement), without the 2 optimizations it was about 7500ms, and with the 2 optimizations it was about 5100ms

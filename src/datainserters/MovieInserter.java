@@ -142,7 +142,7 @@ public class MovieInserter {
                 }
             }
             if (currentBatchSize>maxBatchSize){
-                System.out.println("Executing small movie batch");
+                //System.out.println("Executing small movie batch");
                 statement.executeBatch();
                 genreStatement.executeBatch();
                 ratingStatement.executeBatch();
@@ -154,7 +154,7 @@ public class MovieInserter {
             }
 
         }
-        System.out.println("Executing movie batch");
+        //System.out.println("Executing movie batch");
         statement.executeBatch();
         genreStatement.executeBatch();
         ratingStatement.executeBatch();
@@ -255,7 +255,7 @@ public class MovieInserter {
     protected void adddRatingToBatch(PreparedStatement statement, Movie movie) throws SQLException {
 
         statement.setString(1,movie.movieId);
-        statement.setFloat(2,0);
+        statement.setFloat(2,-1);
         statement.setInt(3,0);
         try{
             statement.addBatch();

@@ -91,11 +91,11 @@ public class StarInserter {
             if (currentBatchSize>maxBatchSize){
                 statement.executeBatch();
                 statement.clearBatch();
-                System.out.println("Executing small star batch");
+                //System.out.println("Executing small star batch");
                 currentBatchSize=0;
             }
         }
-        System.out.println("Executing star batch");
+        //System.out.println("Executing star batch");
         statement.executeBatch();
         statement.close();
         connection.commit();
