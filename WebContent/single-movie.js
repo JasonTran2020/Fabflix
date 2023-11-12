@@ -38,43 +38,24 @@ function handleMovieResult(resultData){
     testBodyElement.on("click", ".btn-outline-primary", handleAddButtonClick); // Event delegation
 }
 
-function getList(theList, propertyName, flag){
-    let result ="";
-    for (let x = 0; x < theList.length;x++){
+function getList(theList, propertyName) {
+    let result = "";
+    for (let x = 0; x < theList.length; x++) {
+        let name = theList[x][propertyName];
+        let link = '<a href="single-star.html?id=' + theList[x]["id"] + '">' + name + '</a>';
 
-        let name = theList[x][propertyName]
-
-        if (x == 0 &&  theList.length == 1) {
-            result += name;
-        }
-        //Condition to put and at the end for last star/genre
-        else if (x == theList.length - 1){
-            if (flag ==  1) {
-                result += "and ";
-                result += '<a href="single-star.html?id=' + theList[x]["id"] + '">' + name + "</a>";
-            }
-            else{
-                result+="and "+name;
-            }
-
-        }
-        else{
-            if (flag == 1) {
-                result += '<a href="single-star.html?id=' + theList[x]["id"] + '">' + name + "</a>";
-                result += ", ";
-            }
-            else {
-                if (x == theList.length - 2){
-                    result += name + " ";
-                }
-                else {
-                    result += name + ", ";
-                }
-            }
+        if (x === theList.length - 1 && theList.length > 1) {
+            // For the last item, add 'and' if there's more than one item in the list
+            result += ' and ' + link;
+        } else if (x > 0) {
+            // For items other than the first, add a comma before the link
+            result += ', ' + link;
+        } else {
+            // For the first item, just add the link
+            result += link;
         }
     }
-    return result
-
+    return result;
 }
 
 let movieId = getParameterByName('id');
