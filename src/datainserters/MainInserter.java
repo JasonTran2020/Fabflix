@@ -71,6 +71,7 @@ public class MainInserter {
             Map<String, String> actorIdMappings = getActorIdMappingsFromExistingDb(connection);
             actorIdMappings.putAll(starInserter.getStarXmlIdToDbId());
             starInMovieInserter.executeDBUpdateFromXMLAndMappings(castPath,movieInserter.getMovieXmlIdToDbId(),actorIdMappings,starInserter.getExistingStarIds());
+            printInconsistencyReport(movieInserter,starInserter,starInMovieInserter);
         }
         catch (SQLException e){
             System.out.println(e.toString());
@@ -78,6 +79,24 @@ public class MainInserter {
             throw new RuntimeException(e);
         }
 
+    }
+
+    public void printInconsistencyReport(MovieInserter movieInserter, StarInserter starInserter, StarInMovieInserter starInMovieInserter){
+        System.out.println("Duplicate movies: " +movieInserter.movieDomParser.countDuplicateMovies);
+        System.out.println("No movie name: " +movieInserter.movieDomParser.countMovieNoName);
+        System.out.println("No movie year: " +movieInserter.movieDomParser.countMovieNoYear);
+        System.out.println("No movie director name: " + movieInserter.movieDomParser.countMovieNoDirector);
+        System.out.println("No xml FID: " + movieInserter.movieDomParser.countNoFid);
+
+        System.out.println("Duplicate actors: " + starInserter.starDomParser.countActorDuplicate);
+        System.out.println("No actor name: " + starInserter.starDomParser.countActorNoName);
+        System.out.println("No actor DOB: " + starInserter.starDomParser.countActorNoDOB);
+
+        System.out.println("Actors in cast but not actors file: " + starInMovieInserter.countActorsAddedInCast);
+        System.out.println("Duplicate cast: " + starInMovieInserter.castDomParser.countDuplicateCast);
+        System.out.println("Movie FIDs that could not be mapped: " + starInMovieInserter.countNoMovieFid);
+        System.out.println("No movie FID for cast: " + starInMovieInserter.castDomParser.countNoMovieName);
+        System.out.println("No actor name for cast: " + starInMovieInserter.castDomParser.countNoStarName);
     }
 
 
@@ -109,6 +128,6 @@ public class MainInserter {
 
         Instant finish = Instant.now();
         long timeElapsed = Duration.between(start, finish).toMillis();
-        System.out.println("Seconds it took to parse and insert everything into the DB (auto-commit off): " +timeElapsed+" milliseconds");
+        System.out.println("Seconds it took to parse and insert everything into the DB: " +timeElapsed+" milliseconds");
     }
 }

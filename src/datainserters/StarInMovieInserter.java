@@ -17,11 +17,13 @@ import java.util.Map;
 import java.util.Set;
 
 public class StarInMovieInserter {
-
+    public CastDomParser castDomParser = null;
     private DataSource dataSource;
     public static String sqlInsertStarInMovieClause = "INSERT INTO stars_in_movies VALUES(?,?)";
     private Map<String,String> moviesXmlIdToDbId = new HashMap<>();
     private Map<String,String> starsXmlIdToDbId = new HashMap<>();
+    public int countActorsAddedInCast = 0;
+    public int countNoMovieFid = 0;
     private Set<Star> newStarsFromCast = new HashSet<>();
     StarInMovieInserter(){
         //As a standalone class not part of the web application, we can't use InitialContext (without prior set up)
@@ -38,7 +40,7 @@ public class StarInMovieInserter {
         moviesXmlIdToDbId = moviesMapping;
         starsXmlIdToDbId = starsMapping;
         try (Connection connection = dataSource.getConnection()){
-            CastDomParser castDomParser = new CastDomParser();
+            castDomParser = new CastDomParser();
             castDomParser.executeStarsParsingFromXmlFile(filePath);
 
             Set<StarInMovie> starsInMovies = castDomParser.getStarsInMovies();
@@ -94,7 +96,10 @@ public class StarInMovieInserter {
     }
 
     protected void addSingleStarInMovieToBatch(StarInMovie starInMovie, PreparedStatement preparedStatement) throws SQLException {
-        if (!moviesXmlIdToDbId.containsKey(starInMovie.xmlMovieId)) throw new MissingPrimaryKeyException("Cannot map movie xml id to MySql id of "+starInMovie+". Skipping entry");
+        if (!moviesXmlIdToDbId.containsKey(starInMovie.xmlMovieId)) {
+            countNoMovieFid +=1;
+            throw new MissingPrimaryKeyException("Cannot map movie xml id to MySql id of "+starInMovie+". Skipping entry");
+        }
         if (!starsXmlIdToDbId.containsKey(starInMovie.xmlStarId)){
             if (starInMovie.xmlStarId == null){
                 throw new MissingPrimaryKeyException("Cannot map null star xml id to MySql id of " + starInMovie+". Skipping entry");
@@ -115,6 +120,7 @@ public class StarInMovieInserter {
                 //System.out.println("Cannot map star xml id (stagename) to MySql id of " + starInMovie+". Saving star stagename to be inserted later");
                 Star temp = new Star("",starInMovie.xmlStarId,-1);
                 temp.birthYear=null;
+                countActorsAddedInCast+=1;
                 starsOnlyInCast.add(temp);
             }
         }

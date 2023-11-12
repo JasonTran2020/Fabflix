@@ -17,6 +17,7 @@ import java.time.Instant;
 import java.util.*;
 
 public class MovieInserter {
+    public MovieDomParser movieDomParser= null;
     private DataSource dataSource;
     protected SortedSet<String> existingGenresSet;
     protected SortedSet<String> allGenresSet;
@@ -45,7 +46,7 @@ public class MovieInserter {
     public void executeDBUpdateFromXML(String filePath){
         //Inserts genres, then movies, then genres in movies in that order
         try (Connection connection = dataSource.getConnection()){
-            MovieDomParser movieDomParser = new MovieDomParser();
+            movieDomParser = new MovieDomParser();
             movieDomParser.executeMoviesParsingFromXmlFile(filePath);
             Set<Movie> movies = movieDomParser.getMovies();
             Set<String> parsedGenres = movieDomParser.getParsedGenres();
@@ -108,7 +109,7 @@ public class MovieInserter {
                     while(true){
                         movie.movieId = movie.generateDBIdFromHashCode(offset);
                         if (existingMovieIds.contains(movie.movieId)){
-                            System.out.println("Duplicate key of "+movie.movieId+". Attempting to make new primary key");
+                            //System.out.println("Duplicate key of "+movie.movieId+". Attempting to make new primary key");
                             offset+=1;
                             continue;
                         }

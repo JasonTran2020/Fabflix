@@ -10,6 +10,9 @@ import java.util.Set;
 
 public class CastDomParser extends DomParser{
     protected Set<StarInMovie> starsInMovies = new HashSet<>();
+    public int countDuplicateCast = 0;
+    public int countNoMovieName = 0;
+    public int countNoStarName = 0;
 
     private void parseAllCast(){
         Element documentElement = dom.getDocumentElement();
@@ -20,7 +23,14 @@ public class CastDomParser extends DomParser{
             try{
                 verifyStarInMovie(starInMovie,element,i);
                 //System.out.println(i+1+": " + starInMovie);
-                starsInMovies.add(starInMovie);
+                if (starsInMovies.contains(starInMovie)){
+                    countDuplicateCast+=1;
+                    System.out.println("Duplicate cast entry of " +starInMovie+". Skipping.");
+                }
+                else{
+                    starsInMovies.add(starInMovie);
+                }
+
             }
             catch (SIMParseError e){
                 System.out.println(e);
@@ -38,14 +48,14 @@ public class CastDomParser extends DomParser{
 
     private void verifyStarInMovie(StarInMovie starInMovie, Element element, int position) throws SIMParseError{
         if (starInMovie.xmlMovieId == null || starInMovie.xmlMovieId.isEmpty()){
+            countNoMovieName+=1;
             throw new SIMParseError("Error parsing Cast"+position+" "+starInMovie+": No movieId for particular cast at element \"f\". Ignoring entry");
         }
         if (starInMovie.xmlStarId == null || starInMovie.xmlStarId.isEmpty()){
+            countNoStarName+=1;
             throw new SIMParseError("Error parsing Cast"+position+" "+starInMovie+": No name/actor id for particular cast at element \"a\". Ignoring entry");
         }
-        if (starInMovie.xmlStarId!=null && starInMovie.xmlStarId.equals("sa")){
-            throw new SIMParseError("Error parsing Cast"+position+" "+starInMovie+": Name/actor id for particular cast at element \"a\" is \"sa\", meaning \"Some Actor\". Ignoring entry");
-        }
+
     }
 
     public static class SIMParseError extends RuntimeException{

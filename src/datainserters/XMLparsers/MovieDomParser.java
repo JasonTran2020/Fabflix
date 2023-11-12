@@ -17,7 +17,11 @@ import java.util.List;
 import java.util.Set;
 
 public class MovieDomParser extends DomParser {
-
+    public int countMovieNoName = 0;
+    public int countMovieNoYear = 0;
+    public int countMovieNoDirector = 0;
+    public int countNoFid=0;
+    public int countDuplicateMovies = 0;
     Set<Movie> movies = new HashSet<>();
     Set<String> genreNames = new HashSet<>();
     private void parseAllMovies(){
@@ -33,8 +37,15 @@ public class MovieDomParser extends DomParser {
             try{
                 verifyMovie(movie,element,i);
                 //System.out.println(i+1+": " + movie);
-                genreNames.addAll(movie.genres);
-                movies.add(movie);
+                if (movies.contains(movie)){
+                    System.out.println("This movie is a duplicate: "+movie+". Skipping it");
+                    countDuplicateMovies+=1;
+                }
+                else{
+                    genreNames.addAll(movie.genres);
+                    movies.add(movie);
+                }
+
             }
             catch (MovieParseError e){
 
@@ -60,7 +71,7 @@ public class MovieDomParser extends DomParser {
 
 
     private String generateRandomMovieId(){
-        //TODO figure out how to generate a string for a movie id. Asking MySQL to make one was recommended against as a final solution
+
         return "Default";
     }
 
@@ -74,16 +85,20 @@ public class MovieDomParser extends DomParser {
         boolean failed = false;
         if (movie.title==null || movie.title.isEmpty()){
             System.out.println("Error parsing movie"+position+" "+movie+": Movie doesn't have a title at element \"t\". Not inserting movie.");
+            countMovieNoName+=1;
             throw new MovieParseError();
         }
         if (movie.director == null || movie.director.isEmpty()){
             System.out.println("Error parsing movie"+position+" "+movie+": Movie doesn't have a director at element \"dirn\". Setting directory as Unknown.");
+            countMovieNoDirector+=1;
             movie.director = "Unknown";
         }
         if (movie.year==-1){
+            countMovieNoYear+=1;
             System.out.println("Error parsing movie"+position+" "+movie+": Failed to parse year from element \"year\". Had a value of "+getTextValue(element,"year")+".Setting date as -1.");
         }
         if (movie.xmlId == null || movie.xmlId.isEmpty()){
+            countNoFid+=1;
             movie.xmlId=null;
             System.out.println("Error parsing movie"+position+" "+movie+": Failed to parse xml id from element \"fid\". Setting to null. Will be unable to link stars later on");
         }

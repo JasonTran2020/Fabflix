@@ -15,12 +15,13 @@ import java.util.Map;
 import java.util.Set;
 
 public class StarInserter {
-
+    StarsDomParser starDomParser = null;
     private static String sqlInsertStarClause = "INSERT INTO stars VALUES(?,?,?)";
     private static String sqlSelectStarClause = "SELECT * FROM stars";
     private Set<Star> existingStars = new HashSet<>();
     protected Set<String> existingStarIds = new HashSet<>();
     protected Map<String,String> starXmlIdToDbId = new HashMap<>();
+
     private DataSource dataSource;
     StarInserter(){
         //As a standalone class not part of the web application, we can't use InitialContext (without prior set up)
@@ -37,7 +38,7 @@ public class StarInserter {
     public void executeDBUpdateFromXML(String filePath){
         //Inserts genres, then movies, then genres in movies in that order
         try (Connection connection = dataSource.getConnection()){
-            StarsDomParser starDomParser = new StarsDomParser();
+            starDomParser = new StarsDomParser();
             starDomParser.executeStarsParsingFromXmlFile(filePath);
             existingStarIds = getExistingStarsIdFromDb(connection);
             Set<Star> stars = starDomParser.getStars();
@@ -60,7 +61,7 @@ public class StarInserter {
                     while(true){
                         star.starId = star.generateDBIdFromHashCode(offset);
                         if (existingStarIds.contains(star.starId)){
-                            System.out.println("Duplicate key of "+star.starId+". Attempting to make new primary key");
+                            //System.out.println("Duplicate key of "+star.starId+". Attempting to make new primary key");
                             offset+=1;
                             continue;
                         }
