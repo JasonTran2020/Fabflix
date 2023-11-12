@@ -39,3 +39,32 @@ How the LIKE operator was used in searching:
  AND (starName LIKE "%tom%" OR starName LIKE "%hanks%")
 * Went with this implementation as it yields the most amount of results while still being considered "relevant" (I mean the substring is in there)
 * A person who wants to search movies (compared to say medical documents or court cases) probably won't be the most careful/precise when typing in their search query
+
+---------
+Project 3:
+---------
+Demo video URL: 
+
+Jason Tran's work:
+
+
+Eric Chang's work:
+* Added reCAPTCHA (Task 1)
+* Ensured consistent usage of PreparedStatements (Task 3)
+* Implemented employee dashboard using stored procedures (Task 5)
+* Encrypted the employee password (Task 4/5)
+
+Files with PreparedStatements:
+
+
+* EmployeeAddMovieServlet (Also uses CallableStatement)
+* EmployeeAddStarServlet
+* EmployeeLoginServlet
+* EmployeeMetadataServlet
+* LoginServlet
+* MovieListServlet
+* MovieSearchServlet
+* PurchaseServlet
+* ShoppingCartServlet
+* SingleMovieServlet
+* SingleStarServlet

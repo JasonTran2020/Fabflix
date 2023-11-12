@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Add a movie</title>
+    <!-- Link to CSS files -->
+    <link rel="stylesheet" href="../general-css-files/tokens.css">
+    <link rel="stylesheet" href="../general-css-files/typography.module.css">
+    <link rel="stylesheet" href="../base.css">
+    <!-- Create a separate CSS file for this page if needed -->
+    <link rel="stylesheet" href="../login.css">
+</head>
+<body>
+<nav id="main-nav">
+    <a href="addmovie.html">Add a movie</a>
+    <a href="addstar.html">Add a star</a>
+    <a href="../home.html">Customer View</a>
+
+</nav>
+    <h2>Add a Movie to the Database</h2>
+    <div id="add_movie_container">
+        <form id="add_movie_form" method="post">
+            <label for="movie_name"><b></b></label>
+            <input id="movie_name" name="movie_name" placeholder="Movie Name" type="text" required>
+            <br>
+            <label for="movie_year"><b></b></label>
+            <input id="movie_year" name="movie_year" placeholder="Year" type="number" required>
+            <br>
+            <label for="movie_director"><b></b></label>
+            <input id="movie_director" name="movie_director" placeholder="Director" type="text" required>
+            <br>
+            <label for="star_name"><b></b></label>
+            <input id="star_name" name="star_name" placeholder="Star Name" type="text" required>
+            <br>
+            <label for="birth_year"><b></b></label>
+            <input id="birth_year" name="birth_year" placeholder="Birth Year (optional)" type="number">
+            <br>
+            <label for="movie_genre"><b></b></label>
+            <input id="movie_genre" name="movie_genre" placeholder="Genre" type="text" required>
+            <br>
+            <input type="submit" value="Submit Movie">
+            <div id="add_movie_message"></div>
+        </form>
+    </div>
+
+    <!-- Include jQuery -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+    <!-- Include your JavaScript file that handles the form submission -->
+    <script src="./addmovie.js"></script>
+
+</body>
+</html>

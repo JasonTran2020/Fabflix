@@ -1,0 +1,23 @@
+.metadata-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+    text-align: center; /* This centers the text in all cells */
+}
+
+/*.metadata-table th,*/
+/*.metadata-table td {*/
+/*    border: 1px solid #ddd;*/
+/*    padding: 8px;*/
+/*    text-align: left; !* This aligns the text to the left in headers and cells, if you want centered text - REMOVE THIS *!*/
+/*}*/
+
+.metadata-table th {
+    background-color: #f2f2f2;
+    text-align: center; /* This centers the text in headers */
+}
+
+h2 {
+    margin-top: 20px;
+    text-align: center; /* This centers the table name headings */
+}

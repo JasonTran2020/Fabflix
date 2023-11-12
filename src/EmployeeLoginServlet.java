@@ -1,3 +1,4 @@
+
 import com.google.gson.JsonObject;
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.annotation.WebServlet;
@@ -5,7 +6,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.jasypt.util.password.StrongPasswordEncryptor;
-import jakarta.servlet.http.HttpSession;
+
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
@@ -16,14 +17,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-@WebServlet(name = "LoginServlet", urlPatterns = "/api/login")
-public class LoginServlet extends HttpServlet {
-    /**
-     * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
-     */
-    //Lastest serialVersionUID was 6L, so bumping this up to 7L.
-    private static final long serialVersionUID = 7L;
-    public static final String TAG = "LoginServlet";
+
+@WebServlet(name = "EmployeeLoginServlet", urlPatterns = "/_dashboard/api/login")
+public class EmployeeLoginServlet extends HttpServlet {
     private DataSource dataSource;
 
     public void init(ServletConfig config) {
@@ -48,45 +44,35 @@ public class LoginServlet extends HttpServlet {
         }
 
         try (Connection conn = dataSource.getConnection()) {
-            String login_info_query = "SELECT c.*, cr.expiration \n" +
-                    "FROM customers c \n" +
-                    "JOIN creditcards cr ON c.ccId = cr.id \n" +
-                    "WHERE c.email = ?;\n";
-
-            PreparedStatement statement = conn.prepareStatement(login_info_query);
-
+            PreparedStatement statement = conn.prepareStatement("SELECT * FROM employees WHERE email = ? LIMIT 1");
             statement.setString(1, username);
-
             ResultSet resultSet = statement.executeQuery();
-
-            if (resultSet.next()) {
-                String dbEmail = resultSet.getString("email");
-                String dbPassword = resultSet.getString("password");
-                int dbId = resultSet.getInt("id");
-                String dbFirstName = resultSet.getString("firstName");
-                String dbLastName = resultSet.getString("lastName");
-                String dbCcId = resultSet.getString("ccId");
-                String dbExpiryDate = resultSet.getString("expiration");
-                String dbAddress = resultSet.getString("address");
-                // Assuming passwords are stored as plaintext for this example, but hashing should be used.
-                if (username.equals(dbEmail) && verifyEncryptedPassword(password,dbPassword)) {
-                    request.getSession().setAttribute("user", new User(dbEmail, dbId, dbFirstName, dbLastName, dbCcId, dbExpiryDate, dbAddress));
+            if (resultSet.next()){
+                String encryptedPassword = resultSet.getString("password");
+                if (verifyEncryptedPassword(password, encryptedPassword)) {
+                    Employee employee = new Employee(resultSet.getString("email"), resultSet.getString("password"), resultSet.getString("fullname"));
+                    request.getSession().setAttribute("employee", employee);
                     responseJsonObject.addProperty("status", "success");
                     responseJsonObject.addProperty("message", "success");
-                    request.getSession().setAttribute("userRole", "customer");
+                    request.getSession().setAttribute("userRole", "employee");
+                }
 
-                } else {
+                else {
                     responseJsonObject.addProperty("status", "fail");
                     responseJsonObject.addProperty("message", "incorrect password");
                 }
-
             }
+
             else {
                 responseJsonObject.addProperty("status", "fail");
-                responseJsonObject.addProperty("message", "user " + username + " doesn't exist");
+                responseJsonObject.addProperty("message", "employee " + username + " doesn't exist");
             }
-            response.getWriter().write(responseJsonObject.toString());
-        } catch (Exception e) {
+            out.write(responseJsonObject.toString());
+            resultSet.close();
+            statement.close();
+
+        }
+        catch (Exception e) {
             JsonObject jsonObject = new JsonObject();
             jsonObject.addProperty("errorMessage", e.getMessage());
             out.write(jsonObject.toString());
