@@ -49,12 +49,14 @@ public class StarInMovieInserter {
 
     public void insertStarsInMoviesIntoDb(Set<StarInMovie> starsInMovies,Connection connection) throws SQLException {
         PreparedStatement statement = connection.prepareStatement(sqlInsertStarInMovieClause);
-        //connection.setAutoCommit(false);
+        connection.setAutoCommit(false);
         int count =1;
         for (StarInMovie starInMovie: starsInMovies){
             try{
-                insertSingleStarInMovieIntoDb(starInMovie,statement);
-                System.out.println(count+". Inserting star in movie into DB: " + starInMovie);
+                //insertSingleStarInMovieIntoDb(starInMovie,statement);
+                addSingleStarInMovieToBatch(starInMovie,statement);
+                System.out.println(count+". Adding star in movie to batch: " + starInMovie);
+                //System.out.println(count+". Inserting star in movie into DB: " + starInMovie);
                 count+=1;
             }
             catch(SQLException|MissingPrimaryKeyException error){
@@ -72,7 +74,10 @@ public class StarInMovieInserter {
                 }
             }
         }
-        //connection.commit();
+
+        System.out.println("Executing batch to add Star in Movie entries into DB");
+        statement.executeBatch();
+        connection.commit();
         statement.close();
 
     }
@@ -83,6 +88,14 @@ public class StarInMovieInserter {
         preparedStatement.setString(1,starsXmlIdToDbId.get(starInMovie.xmlStarId));
         preparedStatement.setString(2,moviesXmlIdToDbId.get(starInMovie.xmlMovieId));
         preparedStatement.executeUpdate();
+    }
+
+    public void addSingleStarInMovieToBatch(StarInMovie starInMovie, PreparedStatement preparedStatement) throws SQLException {
+        if (!moviesXmlIdToDbId.containsKey(starInMovie.xmlMovieId)) throw new MissingPrimaryKeyException("Cannot map movie xml id to MySql id of "+starInMovie+". Skipping entry");
+        if (!starsXmlIdToDbId.containsKey(starInMovie.xmlStarId)) throw new MissingPrimaryKeyException("Cannot map star xml id to MySql id of " + starInMovie+". Skipping entry");
+        preparedStatement.setString(1,starsXmlIdToDbId.get(starInMovie.xmlStarId));
+        preparedStatement.setString(2,moviesXmlIdToDbId.get(starInMovie.xmlMovieId));
+        preparedStatement.addBatch();
     }
 
     public static class MissingPrimaryKeyException extends RuntimeException{

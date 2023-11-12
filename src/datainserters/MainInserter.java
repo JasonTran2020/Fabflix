@@ -33,6 +33,8 @@ public class MainInserter {
 
     public void executeDBUpdateFromXML(String moviePath, String starPath, String castPath){
         try(Connection connection =dataSource.getConnection()){
+            //connection.setAutoCommit(false);
+
             MovieInserter movieInserter = new MovieInserter();
             StarInserter starInserter = new StarInserter();
             StarInMovieInserter starInMovieInserter = new StarInMovieInserter();
@@ -51,6 +53,7 @@ public class MainInserter {
     }
     public void executeWithThreadsDBUpdateFromXML(String moviePath, String starPath, String castPath){
         try(Connection connection =dataSource.getConnection()){
+            //connection.setAutoCommit(false);
             MovieInserter movieInserter = new MovieInserter();
             StarInserter starInserter = new StarInserter();
             StarInMovieInserter starInMovieInserter = new StarInMovieInserter();
@@ -94,10 +97,10 @@ public class MainInserter {
     public static void main(String[] args){
         MainInserter mainInserter = new MainInserter();
         Instant start = Instant.now();
-        mainInserter.executeDBUpdateFromXML("F:\\CS122BProjectLogs\\xml crap\\stanford-movies\\mains243.xml","F:\\CS122BProjectLogs\\xml crap\\stanford-movies\\actors63.xml",
+//        mainInserter.executeDBUpdateFromXML("F:\\CS122BProjectLogs\\xml crap\\stanford-movies\\mains243.xml","F:\\CS122BProjectLogs\\xml crap\\stanford-movies\\actors63.xml",
+//                "F:\\CS122BProjectLogs\\xml crap\\stanford-movies\\casts124.xml");
+        mainInserter.executeWithThreadsDBUpdateFromXML("F:\\CS122BProjectLogs\\xml crap\\stanford-movies\\mains243.xml","F:\\CS122BProjectLogs\\xml crap\\stanford-movies\\actors63.xml",
                 "F:\\CS122BProjectLogs\\xml crap\\stanford-movies\\casts124.xml");
-        //mainInserter.executeWithThreadsDBUpdateFromXML("F:\\CS122BProjectLogs\\xml crap\\stanford-movies\\mains243.xml","F:\\CS122BProjectLogs\\xml crap\\stanford-movies\\actors63.xml",
-                //"F:\\CS122BProjectLogs\\xml crap\\stanford-movies\\casts124.xml");
         Instant finish = Instant.now();
         long timeElapsed = Duration.between(start, finish).toMillis();
         System.out.println("Seconds it took to parse and insert everything into the DB (auto-commit off): " +timeElapsed+" milliseconds");
