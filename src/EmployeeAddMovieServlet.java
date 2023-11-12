@@ -44,7 +44,7 @@ public class EmployeeAddMovieServlet extends HttpServlet {
                 int genreId = getCorrespondingGenreId(movie_genre);
                 String starId = getCorrespondingStarId(star_name);
                 responseJsonObject.addProperty("status", "success");
-                responseJsonObject.addProperty("message", "Success! New movie with id " + newMovieId + " has been added." + "Genre id: " + genreId + ", star id:  " + starId);
+                responseJsonObject.addProperty("message", "Success! New movie with id " + newMovieId + " has been added." + " Genre id: " + genreId + ", star id:  " + starId);
             }
             else {
                 responseJsonObject.addProperty("status", "fail");

@@ -11,7 +11,7 @@ function handleGenreTable(resultData, tableName){
         let entryHTML = "<tr>";
         while (rowPos < max && count < resultData.length){
             let jsonObject=resultData[count];
-            entryHTML+="<td class='headline-medium'>" + "<a href=movie-browse.html?browsing=true&genre=" + jsonObject["name"] + ">" + jsonObject["name"] + "</a>" + "</td>"
+            entryHTML+="<td class='headline-medium'>" + "<a href=movie-browse.html?browsing=true&genre=" + encodeURIComponent(jsonObject["name"]) + ">" + jsonObject["name"] + "</a>" + "</td>"
             rowPos+=1
             count+=1
         }
