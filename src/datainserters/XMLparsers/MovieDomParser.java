@@ -52,6 +52,7 @@ public class MovieDomParser extends DomParser {
             }
 
         }
+        dom = null;
     }
 
     private Movie parseMovie(Element element) {

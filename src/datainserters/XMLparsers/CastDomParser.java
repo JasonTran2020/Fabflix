@@ -37,7 +37,9 @@ public class CastDomParser extends DomParser{
             }
 
         }
+        dom = null;
     }
+
 
     private StarInMovie parseCast(Element element){
         String xmlMovieId = getTextValue(element,"f");

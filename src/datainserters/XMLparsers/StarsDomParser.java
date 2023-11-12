@@ -39,6 +39,7 @@ public class StarsDomParser extends DomParser{
             }
 
         }
+        dom = null;
     }
 
     private Star parseStar(Element element){
