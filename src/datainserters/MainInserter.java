@@ -44,7 +44,7 @@ public class MainInserter {
             //Combine with database and XML for stars. Cannot do for movies as it lacks XML ids, while a star's xml id is just their name
             Map<String, String> actorIdMappings = getActorIdMappingsFromExistingDb(connection);
             actorIdMappings.putAll(starInserter.getStarXmlIdToDbId());
-            starInMovieInserter.executeDBUpdateFromXMLAndMappings(castPath,movieInserter.getMovieXmlIdToDbId(),actorIdMappings);
+            starInMovieInserter.executeDBUpdateFromXMLAndMappings(castPath,movieInserter.getMovieXmlIdToDbId(),actorIdMappings,starInserter.getExistingStarIds());
         }
         catch (SQLException e){
             System.out.println(e.toString());
@@ -70,7 +70,7 @@ public class MainInserter {
             //Combine with database and XML for stars. Cannot do for movies as it lacks XML ids, while a star's xml id is just their name
             Map<String, String> actorIdMappings = getActorIdMappingsFromExistingDb(connection);
             actorIdMappings.putAll(starInserter.getStarXmlIdToDbId());
-            starInMovieInserter.executeDBUpdateFromXMLAndMappings(castPath,movieInserter.getMovieXmlIdToDbId(),actorIdMappings);
+            starInMovieInserter.executeDBUpdateFromXMLAndMappings(castPath,movieInserter.getMovieXmlIdToDbId(),actorIdMappings,starInserter.getExistingStarIds());
         }
         catch (SQLException e){
             System.out.println(e.toString());
@@ -99,8 +99,14 @@ public class MainInserter {
         Instant start = Instant.now();
 //        mainInserter.executeDBUpdateFromXML("F:\\CS122BProjectLogs\\xml crap\\stanford-movies\\mains243.xml","F:\\CS122BProjectLogs\\xml crap\\stanford-movies\\actors63.xml",
 //                "F:\\CS122BProjectLogs\\xml crap\\stanford-movies\\casts124.xml");
-        mainInserter.executeWithThreadsDBUpdateFromXML("F:\\CS122BProjectLogs\\xml crap\\stanford-movies\\mains243.xml","F:\\CS122BProjectLogs\\xml crap\\stanford-movies\\actors63.xml",
-                "F:\\CS122BProjectLogs\\xml crap\\stanford-movies\\casts124.xml");
+        if (args.length<3){
+            mainInserter.executeWithThreadsDBUpdateFromXML("F:\\CS122BProjectLogs\\xml crap\\stanford-movies\\mains243.xml","F:\\CS122BProjectLogs\\xml crap\\stanford-movies\\actors63.xml",
+                    "F:\\CS122BProjectLogs\\xml crap\\stanford-movies\\casts124.xml");
+        }
+        else{
+            mainInserter.executeWithThreadsDBUpdateFromXML(args[0],args[1],args[2]);
+        }
+
         Instant finish = Instant.now();
         long timeElapsed = Duration.between(start, finish).toMillis();
         System.out.println("Seconds it took to parse and insert everything into the DB (auto-commit off): " +timeElapsed+" milliseconds");

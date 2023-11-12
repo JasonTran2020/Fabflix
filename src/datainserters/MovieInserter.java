@@ -115,7 +115,7 @@ public class MovieInserter {
                         existingMovieIds.add(movie.movieId);
                         break;
                     }
-                    System.out.println(count+". Adding movie to batch: " + movie);
+                    //System.out.println(count+". Adding movie to batch: " + movie);
                     //insertSingleMovieIntoDB(movie,statement);
                     addSingleMovieToBatch(movie,statement);
                     addMovieToIdMapping(movie);
@@ -222,7 +222,7 @@ public class MovieInserter {
     protected void insertRatingIntoDb(Connection connection, Movie movie) throws SQLException {
         PreparedStatement statement = connection.prepareStatement(sqlInsertDefaultRatingInMovieClause);
         statement.setString(1,movie.movieId);
-        statement.setFloat(2,0);
+        statement.setFloat(2,-1);
         statement.setInt(3,0);
         try{
             statement.executeUpdate();

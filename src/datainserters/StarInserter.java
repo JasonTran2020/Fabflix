@@ -19,6 +19,7 @@ public class StarInserter {
     private static String sqlInsertStarClause = "INSERT INTO stars VALUES(?,?,?)";
     private static String sqlSelectStarClause = "SELECT * FROM stars";
     private Set<Star> existingStars = new HashSet<>();
+    protected Set<String> existingStarIds = new HashSet<>();
     protected Map<String,String> starXmlIdToDbId = new HashMap<>();
     private DataSource dataSource;
     StarInserter(){
@@ -38,7 +39,7 @@ public class StarInserter {
         try (Connection connection = dataSource.getConnection()){
             StarsDomParser starDomParser = new StarsDomParser();
             starDomParser.executeStarsParsingFromXmlFile(filePath);
-
+            existingStarIds = getExistingStarsIdFromDb(connection);
             Set<Star> stars = starDomParser.getStars();
             insertStarsIntoDb(stars,connection);
 
@@ -47,9 +48,9 @@ public class StarInserter {
         }
     }
 
-    protected void insertStarsIntoDb(Set<Star> stars, Connection connection) throws SQLException {
+    public void insertStarsIntoDb(Set<Star> stars, Connection connection) throws SQLException {
         PreparedStatement statement = connection.prepareStatement(sqlInsertStarClause);
-        Set<String> existingIds = getExistingStarsIdFromDb(connection);
+
         connection.setAutoCommit(false);
         int count = 1;
         for (Star star: stars){
@@ -58,19 +59,19 @@ public class StarInserter {
                 try{
                     while(true){
                         star.starId = star.generateDBIdFromHashCode(offset);
-                        if (existingIds.contains(star.starId)){
+                        if (existingStarIds.contains(star.starId)){
                             System.out.println("Duplicate key of "+star.starId+". Attempting to make new primary key");
                             offset+=1;
                             continue;
                         }
-                        existingIds.add(star.starId);
+                        existingStarIds.add(star.starId);
                         break;
                     }
 
                     addSingleStarToBatch(star,statement);
                     //insertSingleStarIntoDb(star,statement);
                     addStarToIdMapping(star);
-                    System.out.println(count+". Inserting star into DB: " + star);
+                    //System.out.println(count+". Inserting star into DB: " + star);
                     count+=1;
                     break;
                 }
@@ -133,8 +134,15 @@ public class StarInserter {
         }
         rs.close();
         statement.close();
-        return  result;
+        return result;
+    }
 
+    public Set<String> getExistingStarIds() {
+        return existingStarIds;
+    }
+
+    public void setExistingStarIds(Set<String> existingStarIds) {
+        this.existingStarIds = existingStarIds;
     }
 
     public Map<String, String> getStarXmlIdToDbId() {
