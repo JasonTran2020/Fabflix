@@ -300,25 +300,9 @@ public class MovieSearchServlet extends HttpServlet {
         if (title != null && !title.isEmpty()){
             resultStringBuilder.append(" AND MATCH (m.title) AGAINST (");
             //Split by whitespace (space, tab, whatever)
-            boolean first = true;
             String[] words = title.split("\\s+");
             for (int x =0; x<words.length;x++){
                 String word = words[x];
-                //+ to require this in the fulltext, * to indicate a prefix of this word
-                //Surround argument in quotes
-//                if (x==0 && words.length==1){
-//                    args.add("'+" + word + "*'");
-//                }
-//                //Add quote to start
-//                else if (x==0){
-//                    args.add("'+" + word + "* ");
-//                }//Add quote to end
-//                else if (x==words.length-1){
-//                    args.add("+" + word + "*'");
-//                }
-//                else{
-//                    args.add("+" + word + "* ");
-//                }
                 //Because the AGAINST clause puts everything in a single string with '', we can't repeatedely put ? and set each one individually, as each ? will be put into single quotes
                 //and the AGAINST clause only wants one pair of ''
                 arg.append("+").append(word).append("* ");
