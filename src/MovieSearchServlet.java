@@ -37,8 +37,7 @@ public class MovieSearchServlet extends HttpServlet {
     private HttpRequestAttribute<String> browsingAttribute;
     private HttpRequestAttribute<String> genreNameAttribute;
     private HttpRequestAttribute<String> charAttribute;
-    private HttpRequestAttribute<String> pageAttribute;
-    private HttpRequestAttribute<String> perPageAttribute;
+    private HttpRequestAttribute<String> fullTextAttribute;
     private final String sqlSelectCountClause = "SELECT COUNT(*) as max ";
     private final String sqlSearchSelectClause = "SELECT * ";
     private final String sqlSearchFromWhereWithStarClause = " FROM movies AS m, ratings AS r, stars AS s, stars_in_movies as sim WHERE (r.movieId = m.id) AND (sim.starId = s.id) AND (sim.movieId = m.id) ";
@@ -58,8 +57,7 @@ public class MovieSearchServlet extends HttpServlet {
         genreNameAttribute = new HttpRequestAttribute<>(String.class,"genre");
         charAttribute = new HttpRequestAttribute<>(String.class,"char");
 
-        pageAttribute = new HttpRequestAttribute<>(String.class,SessionMovieListParameters.parameterCurrentPage);
-        perPageAttribute = new HttpRequestAttribute<>(String.class,SessionMovieListParameters.parameterMoviesPerPage);
+        fullTextAttribute = new HttpRequestAttribute<>(String.class,"fulltext");
         try {
             dataSource = (DataSource) new InitialContext().lookup("java:comp/env/jdbc/moviedbexample");
         } catch (NamingException e) {
@@ -81,13 +79,21 @@ public class MovieSearchServlet extends HttpServlet {
             //Build out a query and arguments using parameters from the HttpServletRequest which may contain the title, year, director, and/or star
             //Making a prepare statement as the arguments come from a user with potential malicious intent of using SQL injection
             String isBrowsing = browsingAttribute.get(req);
+            String isFullText = fullTextAttribute.get(req);
             String backPage = "";
             int max=0;
             PreparedStatement statement;
             if (isBrowsing!=null && isBrowsing.equals("true")){
                 statement = buildBrowsePrepareStatement(req,conn,sqlBrowseSelectClause,true);
+                //Build a statement with the same WHERE clause as the user wants, just counts how many movies. getMax deals with the MySql details of executing and getting the result
+                //This isn't integrated with the above SQL query because it uses limits and offset, which would give us the wrong count
                 max = getMax(buildBrowsePrepareStatement(req,conn,sqlSelectCountClause,false));
                 backPage = "browse";
+            }
+            else if(isFullText!=null && isFullText.equals("true")){
+                statement = buildFullTextPrepareStatement(req,conn,sqlSearchSelectClause,true);
+                max = getMax(buildFullTextPrepareStatement(req,conn,sqlSelectCountClause,false));
+                backPage = "fulltext";
             }
             else{
                 statement = buildSearchPrepareStatement(req,conn,sqlSearchSelectClause,true);
@@ -146,7 +152,7 @@ public class MovieSearchServlet extends HttpServlet {
     //List<Object> is what enables the latter
     //UPDATE: Yea not going that way anymore, but leaving the comments here because it's useful to learn the diff between ? and Object
     private PreparedStatement buildSearchPrepareStatement(HttpServletRequest request,Connection conn, String selectClause, boolean usePagination) throws SQLException {
-        //This method will return a string query meant to be used in a prepared statement, and a list of string arguments also meant to be used in the same prepared statement
+        //This method returns a prepared statement, with all the appropiate arguments from "request" already set in the correct positions
         String title = titleAttribute.get(request);
         String year = yearAttribute.get(request);
         String director = directorAttribute.get(request);
@@ -154,26 +160,19 @@ public class MovieSearchServlet extends HttpServlet {
         //boolean first = true;
         ArrayList<String> args = new ArrayList<>();
         String result;
-        //Assumption that star is null, in which we don't need to
+        //Assumption that star is null, in which we don't need to include the star in movies table in our search
         if (star==null || star.isEmpty()){
-
             result = selectClause + sqlSearchFromWhereNoStarClause;
         }
         //star is not NULL
         else {
-
             result = selectClause + sqlSearchFromWhereWithStarClause;
             result += " AND " + this.buildLikeQueryString(star,"s.name", args);
-            //first = false;
         }
 
-        //LIKE is case sensitive, ILIKE is case insensitive. Think ILIKE is more reasonable in this case
         if (title!=null /*&& first*/ && !title.isEmpty()){
             result += " AND " + this.buildLikeQueryString(title,"m.title", args);
-            //first = false;
         }
-
-
 
         if (director != null && !director.isEmpty()){
             result += " AND " + this.buildLikeQueryString(director, "m.director",args);
@@ -289,6 +288,42 @@ public class MovieSearchServlet extends HttpServlet {
         }
         return statement;
 
+    }
+
+    private PreparedStatement buildFullTextPrepareStatement(HttpServletRequest request,Connection conn, String selectClause,boolean usePagination) throws SQLException{
+        String title = titleAttribute.get(request);
+        ArrayList<String> args = new ArrayList<>();
+        StringBuilder arg = new StringBuilder();
+        StringBuilder resultStringBuilder = new StringBuilder();
+        resultStringBuilder.append(selectClause);
+        resultStringBuilder.append(sqlSearchFromWhereNoStarClause);
+        if (title != null && !title.isEmpty()){
+            resultStringBuilder.append(" AND MATCH (m.title) AGAINST (");
+            //Split by whitespace (space, tab, whatever)
+            String[] words = title.split("\\s+");
+            for (int x =0; x<words.length;x++){
+                String word = words[x];
+                //Because the AGAINST clause puts everything in a single string with '', we can't repeatedely put ? and set each one individually, as each ? will be put into single quotes
+                //and the AGAINST clause only wants one pair of ''
+                arg.append("+").append(word).append("* ");
+            }
+            resultStringBuilder.append("? ");
+            resultStringBuilder.append(" IN BOOLEAN MODE)");
+        }
+
+        if (usePagination){
+            resultStringBuilder.append(MovieListServlet.buildOrderByClause(request, "m", "r")).append(" ").append(MovieListServlet.buildPaginationClause(request));
+        }
+        String resultString = resultStringBuilder.toString();
+        request.getServletContext().log(TAG + " The complete SQL statement is \"" + resultString + "\"");
+        request.getServletContext().log(TAG + " The number of args are \"" + args.size() + "\"");
+        request.getServletContext().log(TAG + " Args are \"" + args.toString() + "\"");
+        PreparedStatement resultStatement = conn.prepareStatement(resultString);
+
+        resultStatement.setString(1, arg.toString());
+
+        request.getServletContext().log(TAG + " The complete SQL statement after inserting arguments is \"" + resultStatement + "\"");
+        return resultStatement;
     }
 
 }

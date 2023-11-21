@@ -18,6 +18,7 @@ public class SessionMovieListParameters {
     public static final String parameterOrderBy = "orderby";
     public static final String parameterCurrentPage = "p";
     public static final String parameterMoviesPerPage = "pp";
+    public static final String parameterFullText = "fulltext";
 
 
     public static String parseParametersStringFromRequest(HttpServletRequest req){
@@ -32,6 +33,7 @@ public class SessionMovieListParameters {
         allHttpRequestAttributes.add(new HttpRequestAttribute<>(String.class,parameterOrderBy));
         allHttpRequestAttributes.add(new HttpRequestAttribute<>(String.class,parameterCurrentPage));
         allHttpRequestAttributes.add(new HttpRequestAttribute<>(String.class,parameterMoviesPerPage));
+        allHttpRequestAttributes.add(new HttpRequestAttribute<>(String.class,parameterFullText));
         String result = "";
         boolean first = true;
 

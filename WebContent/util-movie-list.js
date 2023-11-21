@@ -24,7 +24,6 @@ function handleAddButtonClick(event) {
 
 }
 function handleMovieListResult(resultData, tableName){
-    console.log("Hey, the success callback function was called");
 
     let testBodyElement = jQuery(tableName);
     //Empty out the element of its children. Could be useful for the SearchServlet depending on implementation
@@ -212,9 +211,6 @@ function limitedListLinked(theList, limit, propertyName, idName, endPoint) {
         let name = theList[x][propertyName];
         let id = encodeURIComponent(theList[x][idName]); // URL-encode the id
         let linkedName = "<a href=\"" + endPoint + id + "\">" + name + "</a>"; // Fixed closing tag
-        console.log("Name " + name); // Add this line
-        console.log("id" + id); // Add this line
-        console.log(linkedName); // Add this line
         if (x === 0) {
             result += linkedName + " ";
         } else if (x === max - 1 && theList.length === max) {
