@@ -9,9 +9,10 @@
     <link rel="stylesheet" href="general-css-files/typography.module.css">
     <!-- The base CSS file -->
     <link rel="stylesheet" href="base.css">
-    <!-- If this file need something different, then it will be override by the single-star.css, as it is declared after the base.css file -->
-    <!-- Temporarily using the moviet-twenty-list.html.css (what is with that name?), but will likely stay due to performing similar roles -->
+
     <link rel="stylesheet" href="movie-twenty-list.html.css">
+    <!-- Include the file for purely doing CSS for the autocomplete, otherwise it is pretty ugly -->
+    <link rel="stylesheet" href="autocomplete.css">
 </head>
 <body>
     <a href="home.html">Back to home</a>
@@ -23,8 +24,9 @@
     <div class="topbar">
         <form id="searchForm" action="movie-fulltext-search.html" >
             <label>
-                <input id="title" type="text" name="title" placeholder="Movie title" value="">
+                <input class="autocomplete-searchbox form-control" id="title" type="text" name="title" placeholder="Movie title" value="">
             </label>
+
             <label>
                 <input type="submit" value="Search" >
             </label>
@@ -34,7 +36,9 @@
             <div id = "sorting-form">
                 <!-- Filled by JS -->
             </div>
+
         </form>
+
     </div>
     <div id="paginator">
         <!-- Filled by JS -->
@@ -61,6 +65,9 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+
+    <!-- Autocomplete 3rd party library -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.devbridge-autocomplete/1.4.11/jquery.autocomplete.min.js"></script>
 
 <!-- Necessary utility file for movie-search.js to function -->
 <script src="util-cart-items.js"></script>

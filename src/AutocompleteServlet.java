@@ -51,6 +51,8 @@ public class AutocompleteServlet extends HttpServlet {
                     JsonObject movieJsonObject = new JsonObject();
                     movieJsonObject.addProperty("id",rs.getString(1));
                     movieJsonObject.addProperty("title",rs.getString(2));
+                    //Required json property for the 3rd party autocomplete library to know what to show the user in the autocomplete box
+                    movieJsonObject.addProperty("value",rs.getString(2));
                     jsonMoviesArray.add(movieJsonObject);
                 }
                 resultJsonObject.add("movies",jsonMoviesArray);
