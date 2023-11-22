@@ -25,6 +25,7 @@ function handleLookupAjaxSuccess(data, query, doneCallback, start) {
     //What we get back is a jsonobject, one of the attribues being "movies", which is a jsonarray
     doneCallback( { suggestions: data["movies"] } );
     let end = Date.now();
+    console.log("autocomplete finished at: "+ end);
     console.log(`Execution time: ${end - start} ms`);
     //Deal with saving the response as a string to be stored in sessionStorage
     sessionStorage.setItem(query,JSON.stringify(data));
@@ -37,12 +38,14 @@ function handleLookupCache(dataString, query, doneCallback, start) {
     //What we get back is a jsonobject, one of the attribues being "movies", which is a jsonarray
     doneCallback( { suggestions: jsonData["movies"] } );
     let end = Date.now();
+    console.log("autocomplete finished at: "+ end);
     console.log(`Execution time: ${end - start} ms`);
 }
 
 function handleLookup(query, doneCallback) {
-    console.log("autocomplete initiated");
+
     let start = Date.now();
+    console.log("autocomplete initiated at: "+ start);
     if (sessionStorage.getItem(query)!==null){
         console.log("autocomplete query for \"" + query + "\" found in cache, skipping ajax call to api");
         let dataString = sessionStorage.getItem(query);
@@ -69,14 +72,15 @@ function handleLookup(query, doneCallback) {
 
 let url = window.location.href;
 let index = url.indexOf("?");
-let parameters="";
+let parameters="?fulltext=true";
 //Needed due to potential bug where there is no ? and we slice at -1
 if (index!==-1){
-    parameters = url.slice(index);
+    parameters = url.slice(index) + "&fulltext=true";
     //Instead of storing the parameter that represents browing, search, or full-text searching in a Session, an alternative is to just add those parameters
     //In the JS file right here, since if this js file is running, that means they are fulltext searching
     //parameters += "&fulltext=true";
 }
+
 
 buildSortingAndPaginationForm("#sorting-form");
 populateSortingAndPaginationForm();

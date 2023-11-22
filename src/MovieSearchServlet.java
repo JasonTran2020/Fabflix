@@ -319,8 +319,10 @@ public class MovieSearchServlet extends HttpServlet {
         request.getServletContext().log(TAG + " The number of args are \"" + args.size() + "\"");
         request.getServletContext().log(TAG + " Args are \"" + args.toString() + "\"");
         PreparedStatement resultStatement = conn.prepareStatement(resultString);
+        if (!arg.toString().isEmpty()){
+            resultStatement.setString(1, arg.toString());
+        }
 
-        resultStatement.setString(1, arg.toString());
 
         request.getServletContext().log(TAG + " The complete SQL statement after inserting arguments is \"" + resultStatement + "\"");
         return resultStatement;
