@@ -13,7 +13,7 @@ import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.StringRequest;
 import edu.uci.ics.fabflixmobile.data.NetworkManager;
 import edu.uci.ics.fabflixmobile.databinding.ActivityLoginBinding;
-import edu.uci.ics.fabflixmobile.ui.movielist.MovieListActivity;
+import edu.uci.ics.fabflixmobile.ui.mainpage.MainPageActivity; // Assuming you have this activity
 import java.util.HashMap;
 import java.util.Map;
 import org.json.JSONObject;
@@ -25,10 +25,6 @@ public class LoginActivity extends AppCompatActivity {
     private EditText password;
     private TextView message;
 
-    /*
-      In Android, localhost is the address of the device or the emulator.
-      To connect to your machine, you need to use the below IP address
-     */
     private final String host = "10.0.2.2";
     private final String port = "8443";
     private final String domain = "project1";
@@ -39,7 +35,6 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         ActivityLoginBinding binding = ActivityLoginBinding.inflate(getLayoutInflater());
-        // upon creation, inflate and initialize the layout
         setContentView(binding.getRoot());
 
         username = binding.username;
@@ -47,33 +42,30 @@ public class LoginActivity extends AppCompatActivity {
         message = binding.message;
         final Button loginButton = binding.login;
 
-        //assign a listener to call a function to handle the user request when clicking a button
         loginButton.setOnClickListener(view -> login());
     }
 
     @SuppressLint("SetTextI18n")
     public void login() {
         message.setText("Trying to login");
-        // use the same network queue across our application
         final RequestQueue queue = NetworkManager.sharedManager(this).queue;
-        // request type is POST
+
         final StringRequest loginRequest = new StringRequest(
                 Request.Method.POST,
                 baseURL + "/api/login",
                 response -> {
                     try {
-                        // Parse the JSON response
                         JSONObject jsonResponse = new JSONObject(response);
                         String status = jsonResponse.getString("status");
                         if ("success".equals(status)) {
-                            // Login successful
-                            Intent MovieListPage = new Intent(LoginActivity.this, MovieListActivity.class);
-                            startActivity(MovieListPage);
-                            finish();  // Close login activity
+                            // Login successful, start MainPageActivity
+                            Intent mainPageIntent = new Intent(LoginActivity.this, MainPageActivity.class);
+                            startActivity(mainPageIntent);
+                            finish();  // Close LoginActivity
                         } else {
-                            // Login failed
+                            // Login failed, show error message
                             String message = jsonResponse.getString("message");
-                            this.message.setText(message);  // Update your TextView to show error message
+                            this.message.setText(message);
                         }
                     } catch (JSONException e) {
                         e.printStackTrace();
@@ -82,7 +74,7 @@ public class LoginActivity extends AppCompatActivity {
                 },
                 error -> {
                     // Network error
-                    error.printStackTrace();
+                    Log.e("login.error", error.toString());
                     this.message.setText("Network error: " + error.getMessage());
                 }
         ) {
@@ -95,6 +87,7 @@ public class LoginActivity extends AppCompatActivity {
                 return params;
             }
         };
+
         queue.add(loginRequest);
     }
 }
