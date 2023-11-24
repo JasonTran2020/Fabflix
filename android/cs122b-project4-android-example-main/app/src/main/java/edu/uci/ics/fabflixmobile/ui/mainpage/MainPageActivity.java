@@ -19,6 +19,7 @@ import edu.uci.ics.fabflixmobile.ui.movielist.MovieListActivity;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import android.view.View;
 
 public class MainPageActivity extends AppCompatActivity {
 
@@ -37,11 +38,16 @@ public class MainPageActivity extends AppCompatActivity {
 
         searchBox = binding.searchBox;
         final Button searchButton = binding.searchButton;
-        String query = searchBox.getText().toString();
-        searchButton.setOnClickListener(view -> performSearch(query));
 
+        searchButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // Retrieve the search query at the moment the button is clicked
+                String query = searchBox.getText().toString();
+                performSearch(query); // Perform the search with the current query
+            }
+        });
     }
-
     private void performSearch(String query) {
         // Use the same network queue across our application
         final RequestQueue queue = NetworkManager.sharedManager(this).queue;
@@ -79,7 +85,7 @@ public class MainPageActivity extends AppCompatActivity {
                 }
         );
 
-        // Add the request to the RequestQueue
+
         queue.add(searchRequest);
     }
 }
