@@ -1,15 +1,18 @@
 package edu.uci.ics.fabflixmobile.ui.movielist;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
-import org.json.JSONArray;
-import org.json.JSONObject;
+import com.google.gson.Gson;
 import edu.uci.ics.fabflixmobile.R;
 import edu.uci.ics.fabflixmobile.data.model.Movie;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,6 +37,12 @@ public class MovieListActivity extends AppCompatActivity {
         nextButton = findViewById(R.id.nextButton);
         allMovies = new ArrayList<>();
 
+        setupButtonListeners();
+        fetchMoviesFromJson();
+        setupListViewClickListener();
+    }
+
+    private void setupButtonListeners() {
         previousButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -53,8 +62,20 @@ public class MovieListActivity extends AppCompatActivity {
                 }
             }
         });
+    }
 
-        fetchMoviesFromJson();
+    private void setupListViewClickListener() {
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Movie selectedMovie = (Movie) parent.getItemAtPosition(position);
+                Intent intent = new Intent(MovieListActivity.this, edu.uci.ics.fabflixmobile.ui.singlemovie.SingleMovieActivity.class);
+                Gson gson = new Gson();
+                String movieJson = gson.toJson(selectedMovie);
+                intent.putExtra("movie", movieJson);
+                startActivity(intent);
+            }
+        });
     }
 
     private void fetchMoviesFromJson() {
@@ -73,7 +94,7 @@ public class MovieListActivity extends AppCompatActivity {
             Toast.makeText(this, "Error parsing movie data", Toast.LENGTH_LONG).show();
         }
 
-        updateListViewForPage(currentPage); // Initialize the view with the first page
+        updateListViewForPage(currentPage);
     }
 
     private void updateListViewForPage(int page) {
@@ -94,8 +115,8 @@ public class MovieListActivity extends AppCompatActivity {
             short year = (short) movieJson.getInt("year");
             String director = movieJson.getString("director");
 
-            List<String> genres = extractNames(movieJson.getJSONArray("genres"), 3);
-            List<String> stars = extractNames(movieJson.getJSONArray("stars"), 3);
+            List<String> genres = extractNames(movieJson.getJSONArray("genres"));
+            List<String> stars = extractNames(movieJson.getJSONArray("stars"));
 
             return new Movie(title, year, director, genres, stars);
         } catch (Exception e) {
@@ -104,9 +125,9 @@ public class MovieListActivity extends AppCompatActivity {
         }
     }
 
-    private List<String> extractNames(JSONArray jsonArray, int limit) {
+    private List<String> extractNames(JSONArray jsonArray) {
         List<String> names = new ArrayList<>();
-        for (int i = 0; i < jsonArray.length() && i < limit; i++) {
+        for (int i = 0; i < jsonArray.length(); i++) {
             try {
                 names.add(jsonArray.getJSONObject(i).getString("name"));
             } catch (Exception e) {

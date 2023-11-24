@@ -67,7 +67,7 @@ public class MovieListViewAdapter extends ArrayAdapter<Movie> {
     // Helper method to format the list of items into a comma-separated string
     private String formatItemList(List<String> items) {
         // Join the first 3 items or fewer if not enough items are present
-        List<String> firstThreeItems = items.subList(0, Math.min(items.size(), 3));
-        return TextUtils.join(", ", firstThreeItems);
+        List<String> firstThreeItems = items.size() > 3 ? items.subList(0, 3) : items;
+        return TextUtils.join(", ", firstThreeItems) + (items.size() > 3 ? "..." : "");
     }
 }
