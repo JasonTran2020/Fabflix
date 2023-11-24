@@ -56,7 +56,7 @@ public class MainPageActivity extends AppCompatActivity {
         final String encodedQuery = Uri.encode(query);
 
         // Prepare the search URL
-        final String searchURL = baseURL + "/api/search-movie?title=" + encodedQuery;
+        final String searchURL = baseURL + "/api/search-movie?title=" + encodedQuery + "&fulltext=true";
 
         // Request a string response from the provided URL
         final StringRequest searchRequest = new StringRequest(

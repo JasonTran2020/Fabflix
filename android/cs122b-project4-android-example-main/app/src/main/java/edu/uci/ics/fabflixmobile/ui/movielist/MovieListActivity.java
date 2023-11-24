@@ -1,6 +1,8 @@
 package edu.uci.ics.fabflixmobile.ui.movielist;
 
 import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
@@ -14,12 +16,48 @@ import java.util.List;
 
 public class MovieListActivity extends AppCompatActivity {
 
+    private static final int PAGE_SIZE = 10;
+    private ArrayList<Movie> allMovies;
+    private int currentPage = 0;
+    private Button previousButton;
+    private Button nextButton;
+    private ListView listView;
+    private MovieListViewAdapter adapter;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_movielist);
 
-        ArrayList<Movie> movies = new ArrayList<>();
+        listView = findViewById(R.id.list);
+        previousButton = findViewById(R.id.previousButton);
+        nextButton = findViewById(R.id.nextButton);
+        allMovies = new ArrayList<>();
+
+        previousButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (currentPage > 0) {
+                    currentPage--;
+                    updateListViewForPage(currentPage);
+                }
+            }
+        });
+
+        nextButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if ((currentPage + 1) * PAGE_SIZE < allMovies.size()) {
+                    currentPage++;
+                    updateListViewForPage(currentPage);
+                }
+            }
+        });
+
+        fetchMoviesFromJson();
+    }
+
+    private void fetchMoviesFromJson() {
         String moviesJson = getIntent().getStringExtra("movies");
         try {
             JSONArray moviesArray = new JSONArray(moviesJson);
@@ -27,7 +65,7 @@ public class MovieListActivity extends AppCompatActivity {
                 JSONObject movieJson = moviesArray.getJSONObject(i);
                 Movie movie = createMovieFromJson(movieJson);
                 if (movie != null) {
-                    movies.add(movie);
+                    allMovies.add(movie);
                 }
             }
         } catch (Exception e) {
@@ -35,9 +73,19 @@ public class MovieListActivity extends AppCompatActivity {
             Toast.makeText(this, "Error parsing movie data", Toast.LENGTH_LONG).show();
         }
 
-        MovieListViewAdapter adapter = new MovieListViewAdapter(this, movies);
-        ListView listView = findViewById(R.id.list);
+        updateListViewForPage(currentPage); // Initialize the view with the first page
+    }
+
+    private void updateListViewForPage(int page) {
+        int startIndex = page * PAGE_SIZE;
+        int endIndex = Math.min((page + 1) * PAGE_SIZE, allMovies.size());
+
+        ArrayList<Movie> pageMovies = new ArrayList<>(allMovies.subList(startIndex, endIndex));
+        adapter = new MovieListViewAdapter(this, pageMovies);
         listView.setAdapter(adapter);
+
+        previousButton.setEnabled(page > 0);
+        nextButton.setEnabled(endIndex < allMovies.size());
     }
 
     private Movie createMovieFromJson(JSONObject movieJson) {
@@ -56,7 +104,6 @@ public class MovieListActivity extends AppCompatActivity {
         }
     }
 
-    // Helper method to extract up to 'limit' names from a JSONArray (always 3)
     private List<String> extractNames(JSONArray jsonArray, int limit) {
         List<String> names = new ArrayList<>();
         for (int i = 0; i < jsonArray.length() && i < limit; i++) {
