@@ -16,6 +16,8 @@ import edu.uci.ics.fabflixmobile.databinding.ActivityLoginBinding;
 import edu.uci.ics.fabflixmobile.ui.movielist.MovieListActivity;
 import java.util.HashMap;
 import java.util.Map;
+import org.json.JSONObject;
+import org.json.JSONException;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -28,9 +30,9 @@ public class LoginActivity extends AppCompatActivity {
       To connect to your machine, you need to use the below IP address
      */
     private final String host = "10.0.2.2";
-    private final String port = "8080";
-    private final String domain = "cs122b_project2_login_cart_example_war";
-    private final String baseURL = "http://" + host + ":" + port + "/" + domain;
+    private final String port = "8443";
+    private final String domain = "project1";
+    private final String baseURL = "https://" + host + ":" + port + "/" + domain;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -59,20 +61,31 @@ public class LoginActivity extends AppCompatActivity {
                 Request.Method.POST,
                 baseURL + "/api/login",
                 response -> {
-                    // TODO: should parse the json response to redirect to appropriate functions
-                    //  upon different response value.
-                    Log.d("login.success", response);
-                    //Complete and destroy login activity once successful
-                    finish();
-                    // initialize the activity(page)/destination
-                    Intent MovieListPage = new Intent(LoginActivity.this, MovieListActivity.class);
-                    // activate the list page.
-                    startActivity(MovieListPage);
+                    try {
+                        // Parse the JSON response
+                        JSONObject jsonResponse = new JSONObject(response);
+                        String status = jsonResponse.getString("status");
+                        if ("success".equals(status)) {
+                            // Login successful
+                            Intent MovieListPage = new Intent(LoginActivity.this, MovieListActivity.class);
+                            startActivity(MovieListPage);
+                            finish();  // Close login activity
+                        } else {
+                            // Login failed
+                            String message = jsonResponse.getString("message");
+                            this.message.setText(message);  // Update your TextView to show error message
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        this.message.setText("Error parsing response.");
+                    }
                 },
                 error -> {
-                    // error
-                    Log.d("login.error", error.toString());
-                }) {
+                    // Network error
+                    error.printStackTrace();
+                    this.message.setText("Network error: " + error.getMessage());
+                }
+        ) {
             @Override
             protected Map<String, String> getParams() {
                 // POST request form data
@@ -82,7 +95,6 @@ public class LoginActivity extends AppCompatActivity {
                 return params;
             }
         };
-        // important: queue.add is where the login request is actually sent
         queue.add(loginRequest);
     }
 }
