@@ -103,3 +103,16 @@ Prior to any optimization, it took about 47,000 to 49,000 ms<br>
 <b>Both combined</b>
 * Reduced time to around 39,000 ms to 40,000 ms <br>
 * When auto-commit is on (I know it doesn't count as an optimization requirement), without the 2 optimizations it was about 7500ms, and with the 2 optimizations it was about 5100ms
+
+---------
+Project 4:
+---------
+Demo video URL: TODO
+
+Jason Tran's work:
+* Did fulltext and autocomplete on web (Task 1)
+
+
+
+Eric Chang's work:
+* Did all of the Android App (Task 2)

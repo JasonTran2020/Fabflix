@@ -24,7 +24,7 @@ import android.view.View;
 public class MainPageActivity extends AppCompatActivity {
 
     private EditText searchBox;
-    private final String host = "10.0.2.2";
+    private final String host = "18.219.59.225";
     private final String port = "8443";
     private final String domain = "project1";
     private final String baseURL = "https://" + host + ":" + port + "/" + domain;
