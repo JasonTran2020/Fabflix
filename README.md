@@ -107,7 +107,7 @@ Prior to any optimization, it took about 47,000 to 49,000 ms<br>
 ---------
 Project 4:
 ---------
-Demo video URL: TODO
+Demo video URL: https://youtu.be/s-ihN6WePvM
 
 Jason Tran's work:
 * Did fulltext and autocomplete on web (Task 1)
