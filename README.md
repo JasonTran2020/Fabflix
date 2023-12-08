@@ -141,12 +141,12 @@ Project 5:
 
 - # JMeter TS/TJ Time Measurement Report
 
-| **Single-instance Version Test Plan**          | **Graph Results Screenshot** | **Average Query Time(ms)** | **Average Search Servlet Time(ms)** | **Average JDBC Time(ms)** | **Analysis** |
-|------------------------------------------------|------------------------------|----------------------------|-------------------------------------|---------------------------|--------------|
-| Case 1: HTTP/1 thread                          | ![](path to image in img/)   | ??                         | ??                                  | ??                        | ??           |
-| Case 2: HTTP/10 threads                        | ![](path to image in img/)   | 409                        | 252                                 | 149                       | ??           |
-| Case 3: HTTPS/10 threads                       | ![](path to image in img/)   | ??                         | ??                                  | ??                        | ??           |
-| Case 4: HTTP/10 threads/No connection pooling  | ![](path to image in img/)   | 511                        | 354                                 | 159                       | ??           |
+| **Single-instance Version Test Plan**          | **Graph Results Screenshot**       | **Average Query Time(ms)** | **Average Search Servlet Time(ms)** | **Average JDBC Time(ms)** | **Analysis** |
+|------------------------------------------------|------------------------------------|----------------------------|-------------------------------------|---------------------------|--------------|
+| Case 1: HTTP/1 thread                          | ![](img/1-http-pool-graph.PNG)     | 186                        | 32                                  | 18                        | ??           |
+| Case 2: HTTP/10 threads                        | ![](img/10-http-pool-graph.PNG)    | 398                        | 244                                 | 146                       | ??           |
+| Case 3: HTTPS/10 threads                       | ![](img/10-https-pool-graph.PNG)   | 468                        | 234                                 | 140                       | ??           |
+| Case 4: HTTP/10 threads/No connection pooling  | ![](img/10-http-no-pool-graph.PNG) | 488                        | 330                                 | 211                       | ??           |
 
 | **Scaled Version Test Plan**                   | **Graph Results Screenshot** | **Average Query Time(ms)** | **Average Search Servlet Time(ms)** | **Average JDBC Time(ms)** | **Analysis** |
 |------------------------------------------------|------------------------------|----------------------------|-------------------------------------|---------------------------|--------------|
