@@ -92,8 +92,13 @@ public class MovieSearchServlet extends HttpServlet {
         // Output stream to STDOUT
         PrintWriter out = resp.getWriter();
 
+        //Include the time to get the connection
+        long totalConnTime = 0;
+        long connStartTime = System.nanoTime();
         try (Connection conn = dataSource.getConnection()){
             // Vast majority of this was dervied from MovietListServlet. Check for more detailed comments. Comments here are more specific to searching
+            long connEndTime = System.nanoTime();
+            totalConnTime = connEndTime-connStartTime;
 
             //Build out a query and arguments using parameters from the HttpServletRequest which may contain the title, year, director, and/or star
             //Making a prepare statement as the arguments come from a user with potential malicious intent of using SQL injection
@@ -140,7 +145,7 @@ public class MovieSearchServlet extends HttpServlet {
             resp.setStatus(200);
             long endTimeTS = System.nanoTime();
             long totalTimeTS = endTimeTS-startTimeTS;
-            totalTimeTJ = endTimeTJ - starTimeTJ;
+            totalTimeTJ = endTimeTJ - starTimeTJ + totalConnTime;
 
             logFileWriter.write("search servlet total execution time:"+totalTimeTS+", JDBC execution time:"+totalTimeTJ+"\n");
             logFileWriter.flush();
