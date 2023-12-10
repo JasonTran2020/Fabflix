@@ -121,6 +121,12 @@ Eric Chang's work:
 ---------
 Project 5:
 ---------
+
+Jason Tran's work:
+* Did pooling and testing (Task 1 and 4)
+
+Eric Chang's work:
+* Did load balancing and scaling (Task 2 and 3)
 - # Connection Pooling
  - #### Include the filename/path of all code/configuration files in GitHub of using JDBC Connection Pooling.
     - WebContent/META-INF/context.xml (File that specifies that we are using pooling and specific settings for pooling)
@@ -131,19 +137,21 @@ Project 5:
      - With connection pooling, code maintains a number of already opened connections, and hands them out to servlets when the request one rather than opening a new one on the spot, which saves time for client who is communicating with the servlet
      - Even when the servlet calls .close() on the connection, the code might not actually close the connection, and instead save the connection as an availible connection in the pool to be handed out again later on
  - #### Explain how Connection Pooling works with two backend SQL.
-
+   - With two backend SQL now, there are now two separate pools of connections, which I will call pool1 and pool2 respective to server1 and server2. 
+   If load balancers decides to forward a request to server1, then a connection from pool1 may be taken (or a new one will be opened if there are none availible), but it will NOT grab a connection from pool2. Vice versa goes for when the request is forwarded to server2
 
 - # Master/Slave
  - #### Include the filename/path of all code/configuration files in GitHub of routing queries to Master/Slave SQL.
     - src/EmployeeAddMovieServlet.java
     - src/EmployeeAddStarServlet.java
     - src/PurchaseServlet.java
+    - WebContent/META-INF/context.xml
  - #### How read/write requests were routed to Master/Slave SQL?
-   the context.xml file specifies two JDBC data sources for interactions with the database in project 5. the MasterDB data source
+   - the context.xml file specifies two JDBC data sources for interactions with the database in project 5. the MasterDB data source
    is specifically meant for handling write operations (may handle read operations too) but in this case only handles write operations.
    In any other case where read operations are done, moviedbexample is used instead. Only the noted files from above were altered.
 - # JMeter TS/TJ Time Logs
- - #### Instructions of how to use the `log_processing.py` script to process the JMeter logs.
+ - #### Instructions of how to use the `log_processing.py` script to process the JMeter logs. Located in the jmeter-results directory
  - Run the log_processing.py file with a Python 3 interpreter. Any version should be fine but I used Python 3.11
  - It will then ask for a filepath to the log file created by the servlets. Enter in the path (no double quotes)
  - The statistics will be printed our based on that file's contents
