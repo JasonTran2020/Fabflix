@@ -123,9 +123,13 @@ Project 5:
 ---------
 - # Connection Pooling
  - #### Include the filename/path of all code/configuration files in GitHub of using JDBC Connection Pooling.
+    - WebContent/META-INF/context.xml (File that specifies that we are using pooling and specific settings for pooling)
+    - src/MovieSearchServlet (technically any servlet that connects to MySql now uses pooling due to the above files settings, but this is just a particular example)
 
  - #### Explain how Connection Pooling is utilized in the Fabflix code.
-
+     - Anytime a servlet asks to open a connection to the MySql database, it gets a connection that might have been opened long before. 
+     - With connection pooling, code maintains a number of already opened connections, and hands them out to servlets when the request one rather than opening a new one on the spot, which saves time for client who is communicating with the servlet
+     - Even when the servlet calls .close() on the connection, the code might not actually close the connection, and instead save the connection as an availible connection in the pool to be handed out again later on
  - #### Explain how Connection Pooling works with two backend SQL.
 
 
@@ -136,17 +140,25 @@ Project 5:
 
 
 - # JMeter TS/TJ Time Logs
- - #### Instructions of how to use the `log_processing.*` script to process the JMeter logs.
+ - #### Instructions of how to use the `log_processing.py` script to process the JMeter logs.
+ - Run the log_processing.py file with a Python 3 interpreter. Any version should be fine but I used Python 3.11
+ - It will then ask for a filepath to the log file created by the servlets. Enter in the path (no double quotes)
+ - The statistics will be printed our based on that file's contents
+ - It will ask prompt you to either enter another filepath if you want to process another file AND combine its statistics with any previous files that have been processed
+ - Type "y" and it will request for the path like before, or type "n" to terminate the process
 
 
 - # JMeter TS/TJ Time Measurement Report
+* Analysis descriptions are written relative to Single-Instance or Scaled test plan cases. i.e., saying shortest
+* Test runs were all ran for 2 minutes each, reusing the query file if they finished the file befor 2 minutes were done
+* Log files and jtl files can be found in the jmeter-results directory
 
-| **Single-instance Version Test Plan**          | **Graph Results Screenshot**       | **Average Query Time(ms)** | **Average Search Servlet Time(ms)** | **Average JDBC Time(ms)** | **Analysis** |
-|------------------------------------------------|------------------------------------|----------------------------|-------------------------------------|---------------------------|--------------|
-| Case 1: HTTP/1 thread                          | ![](img/1-http-pool-graph.PNG)     | 186                        | 32                                  | 18                        | ??           |
-| Case 2: HTTP/10 threads                        | ![](img/10-http-pool-graph.PNG)    | 398                        | 244                                 | 146                       | ??           |
-| Case 3: HTTPS/10 threads                       | ![](img/10-https-pool-graph.PNG)   | 468                        | 234                                 | 140                       | ??           |
-| Case 4: HTTP/10 threads/No connection pooling  | ![](img/10-http-no-pool-graph.PNG) | 488                        | 330                                 | 211                       | ??           |
+| **Single-instance Version Test Plan**          | **Graph Results Screenshot**       | **Average Query Time(ms)** | **Average Search Servlet Time(ms)** | **Average JDBC Time(ms)** | **Analysis**                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+|------------------------------------------------|------------------------------------|----------------------------|-------------------------------------|---------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Case 1: HTTP/1 thread                          | ![](img/1-http-pool-graph.PNG)     | 186                        | 32                                  | 18                        | 642 req. Has the shortest time in all regards, which makes sense as this test case puts the lightest load on the server with only a single thread.                                                                                                                                                                                                                                                                                                                                 |
+| Case 2: HTTP/10 threads                        | ![](img/10-http-pool-graph.PNG)    | 398                        | 244                                 | 146                       | 2992 req. Faster than 10 HTTP with no pooling as we aren't spending as much time making connections to the database thanks to pooling. Gets more requests completed than single http, but each requests takes longer, since the servlet is dealing with multiple requests in parallel rather sequentially like in single http                                                                                                                                                      |
+| Case 3: HTTPS/10 threads                       | ![](img/10-https-pool-graph.PNG)   | 468                        | 234                                 | 140                       | 2545 req. Has nearly the same average servlet time and JDBC time as 10 http no pool, but has a higher Average Query Time. This is due to the Secure part of HTTPS requiring computation and therefore more time, which doesn't involve our servlet, hence those averages are similar to HTTP 10 thread. Also note, if you take the average query time and subtract out the average servlet time for all the test cases, the results are all very similar (~150ms EXCEPT) for HTTPS |
+| Case 4: HTTP/10 threads/No connection pooling  | ![](img/10-http-no-pool-graph.PNG) | 488                        | 330                                 | 211                       | 2439 req. Nearly as slow as HTTPS 10 threads despite no Secure part to take up time, but this is because the servlet is slower due to no connection pooling. You can see it in how the average servlet time and average JDBC are both higher than in HTTPS 10 threads.                                                                                                                                                                                                             |
 
 | **Scaled Version Test Plan**                   | **Graph Results Screenshot** | **Average Query Time(ms)** | **Average Search Servlet Time(ms)** | **Average JDBC Time(ms)** | **Analysis** |
 |------------------------------------------------|------------------------------|----------------------------|-------------------------------------|---------------------------|--------------|
