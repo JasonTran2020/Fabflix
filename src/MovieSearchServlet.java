@@ -14,8 +14,12 @@ import jakarta.servlet.http.HttpSession;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
 import java.sql.*;
 import java.util.*;
 
@@ -44,9 +48,10 @@ public class MovieSearchServlet extends HttpServlet {
     private final String sqlSearchFromWhereNoStarClause = " FROM movies AS m, ratings AS r WHERE (r.movieId = m.id) ";
     private final String sqlBrowseSelectClause = "SELECT DISTINCT m.id,m.title,m.year,m.director,r.rating,r.numVotes  ";
     private final String sqlBrowseFromWhereClause = " FROM movies AS m, ratings AS r, genres_in_movies AS gim , genres AS g  WHERE (gim.genreId = g.id) AND (gim.movieId = m.id) AND (r.movieId = m.id)  ";
+    private File logFile;
+    private FileWriter logFileWriter;
 
-
-    public void init(ServletConfig config) {
+    public void init(ServletConfig config) throws ServletException {
         //Initialize RequestAttributes here with new objects.
         titleAttribute = new HttpRequestAttribute<>(String.class,"title");
         yearAttribute = new HttpRequestAttribute<>(String.class,"year");
@@ -63,18 +68,37 @@ public class MovieSearchServlet extends HttpServlet {
         } catch (NamingException e) {
             e.printStackTrace();
         }
+        //Set up file for logging time
+        //Gotta use the config parameter, not getServletConfig or just getServletContext because we didn't call super.init
+        System.out.println(config.getServletContext());
+        System.out.println(config.getServletContext().getRealPath("/"));
+        String logFilePath = config.getServletContext().getRealPath("/")+ FileSystems.getDefault().getSeparator()+"search_time_log.txt";
+        System.out.println("Search servlet log file path: "+logFilePath);
+        File logFile = new File(logFilePath);
+        try {
+            logFile.createNewFile();
+            logFileWriter = new FileWriter(logFile.getAbsoluteFile(), true);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-
+        long startTimeTS = System.nanoTime();
+        long totalTimeTJ = 0;
         resp.setContentType("application/json");// Response mime type
 
         // Output stream to STDOUT
         PrintWriter out = resp.getWriter();
 
+        //Include the time to get the connection
+        long totalConnTime = 0;
+        long connStartTime = System.nanoTime();
         try (Connection conn = dataSource.getConnection()){
             // Vast majority of this was dervied from MovietListServlet. Check for more detailed comments. Comments here are more specific to searching
+            long connEndTime = System.nanoTime();
+            totalConnTime = connEndTime-connStartTime;
 
             //Build out a query and arguments using parameters from the HttpServletRequest which may contain the title, year, director, and/or star
             //Making a prepare statement as the arguments come from a user with potential malicious intent of using SQL injection
@@ -100,12 +124,12 @@ public class MovieSearchServlet extends HttpServlet {
                 max = getMax(buildSearchPrepareStatement(req,conn,sqlSelectCountClause,false));
                 backPage = "search";
             }
-
+            long starTimeTJ = System.nanoTime();
             ResultSet resultSet = statement.executeQuery();
 
             //Convert stuff from resultSet into jsonArray because we said the content type we were going to do that
             JsonArray jsonArray = MovieListServlet.buildMovieJsonArray(resultSet,conn);
-
+            long endTimeTJ = System.nanoTime();
             // Log to localhost log
             req.getServletContext().log("getting " + jsonArray.size() + " results");
             JsonObject jsonObject = new JsonObject();
@@ -119,6 +143,12 @@ public class MovieSearchServlet extends HttpServlet {
             MovieListServlet.saveMovieListParameters(req,backPage);
             // Set response status to 200 (OK)
             resp.setStatus(200);
+            long endTimeTS = System.nanoTime();
+            long totalTimeTS = endTimeTS-startTimeTS;
+            totalTimeTJ = endTimeTJ - starTimeTJ + totalConnTime;
+
+            logFileWriter.write("search servlet total execution time:"+totalTimeTS+", JDBC execution time:"+totalTimeTJ+"\n");
+            logFileWriter.flush();
 
         }
         catch (Exception e){
