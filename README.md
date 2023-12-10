@@ -135,10 +135,13 @@ Project 5:
 
 - # Master/Slave
  - #### Include the filename/path of all code/configuration files in GitHub of routing queries to Master/Slave SQL.
-
+    - src/EmployeeAddMovieServlet.java
+    - src/EmployeeAddStarServlet.java
+    - src/PurchaseServlet.java
  - #### How read/write requests were routed to Master/Slave SQL?
-
-
+   the context.xml file specifies two JDBC data sources for interactions with the database in project 5. the MasterDB data source
+   is specifically meant for handling write operations (may handle read operations too) but in this case only handles write operations.
+   In any other case where read operations are done, moviedbexample is used instead. Only the noted files from above were altered.
 - # JMeter TS/TJ Time Logs
  - #### Instructions of how to use the `log_processing.py` script to process the JMeter logs.
  - Run the log_processing.py file with a Python 3 interpreter. Any version should be fine but I used Python 3.11
