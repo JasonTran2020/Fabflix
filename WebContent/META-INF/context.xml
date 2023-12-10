@@ -1,7 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <Context>
-
+    <!-- Master Data Source for Write Operations! -->
+    <Resource name="jdbc/MasterDB"
+              auth="Container"
+              type="javax.sql.DataSource"
+              driverClassName="com.mysql.cj.jdbc.Driver"
+              url="jdbc:mysql://172.31.17.91:3306/moviedb"
+              username="mytestuser"
+              password="My6$Password"
+              maxTotal="100"
+              maxIdle="30"
+              maxWaitMillis="10000"/>
     <!-- Defines a Data Source Connecting to localhost moviedbexample-->
     <Resource name="jdbc/moviedbexample"
               auth="Container"
@@ -9,5 +19,8 @@
               type="javax.sql.DataSource"
               username="mytestuser"
               password="My6$Password"
-              url="jdbc:mysql://localhost:3306/moviedb"/>
+              url="jdbc:mysql://localhost:3306/moviedb"
+              maxTotal="100"
+              maxIdle="30"
+              maxWaitMillis="10000"/>
 </Context>
