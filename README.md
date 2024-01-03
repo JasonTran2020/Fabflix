@@ -1,4 +1,4 @@
-## CS 122B Project 
+## Full-stack project created for UCI's CS122B course
 
 Yes the base of this is just the API example
 
